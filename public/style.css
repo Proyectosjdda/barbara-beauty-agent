@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Dancing+Script:wght@700&display=swap');
 
 :root {
   --bg-primary: #FFF0F5;
@@ -64,15 +64,17 @@ body {
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 36px;
-  font-weight: 400;
+  font-family: 'Dancing Script', cursive;
+  font-size: 48px;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
   letter-spacing: 2px;
-  color: var(--brand-color);
-  text-shadow: none;
-  text-transform: uppercase;
+  background: linear-gradient(45deg, #FF3399, #FF99CC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0px 4px 6px rgba(255, 102, 178, 0.4));
+  text-transform: capitalize;
 }
 
 .nav-links {

@@ -302,10 +302,10 @@ function initCalendar() {
         const currentName = event.title.split(' (')[0].replace('👤 ', '');
         const currentPhone = event.extendedProps.phone || '';
         
-        const newName = prompt("Nuevo nombre del cliente:", currentName);
+        const newName = prompt("📝 Edita el nombre del cliente (O deja el mismo):", currentName);
         if (newName === null) return;
         
-        const newPhone = prompt("Nuevo teléfono del cliente:", currentPhone);
+        const newPhone = prompt("📱 Edita el teléfono del cliente (O deja el mismo):", currentPhone);
         if (newPhone === null) return;
 
         try {
@@ -448,8 +448,8 @@ function setupMonthPicker() {
             popup.dataset.year = cy;
             popup.querySelector('span').innerText = cy;
         }
-        popup.style.left = (rect.left + (rect.width / 2) - 130) + 'px';
-        popup.style.top = (rect.bottom + 10) + 'px';
+        popup.style.left = (rect.left + window.scrollX + (rect.width / 2) - 130) + 'px';
+        popup.style.top = (rect.bottom + window.scrollY + 10) + 'px';
         popup.style.display = popup.style.display === 'none' ? 'grid' : 'none';
     };
 }
