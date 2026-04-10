@@ -2,11 +2,11 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const moment = require('moment');
 
-const STORAGE_PATH = process.env.STORAGE_PATH || __dirname;
+const fs = require('fs');
+const STORAGE_PATH = process.env.STORAGE_PATH || (fs.existsSync('/data') ? '/data' : __dirname);
 const DB_PATH = path.join(STORAGE_PATH, 'barber.db');
 
 // Ensure storage directory exists
-const fs = require('fs');
 if (!fs.existsSync(STORAGE_PATH)) {
     fs.mkdirSync(STORAGE_PATH, { recursive: true });
 }

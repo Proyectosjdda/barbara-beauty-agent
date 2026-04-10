@@ -11,9 +11,9 @@ function getRandomMsg(variations) {
 const cron = require('node-cron');
 require('dotenv').config();
 
-const STORAGE_PATH = process.env.STORAGE_PATH || __dirname;
 const path = require('path');
 const fs = require('fs');
+const STORAGE_PATH = process.env.STORAGE_PATH || (fs.existsSync('/data') ? '/data' : __dirname);
 
 // Ensure storage directory exists
 if (!fs.existsSync(STORAGE_PATH)) {
