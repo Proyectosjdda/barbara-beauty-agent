@@ -480,12 +480,10 @@ function startReminderCron() {
         // No evaluar recordatorios los domingos
         if (currentDay === 0) return;
 
-        // Después de las 10 PM (22) y antes de las 7 AM (7), validar solo cada 3 horas para "ahorrar" pings
-        if (currentHour >= 22 || currentHour < 7) {
-            // Solo correr a las 22:00, 1:00 y 4:00 (módulo 3) y restringir a los minutos 0
-            if (now.minute() > 14 || (currentHour % 3 !== 1 && currentHour !== 22 && currentHour !== 4)) {
-                return;
-            }
+        // Apagar completamente las validaciones desde las 10:00 PM hasta las 5:59 AM.
+        // A las 6:00 AM despertará y atrapará perfectamente la cita de las 7:00 AM.
+        if (currentHour >= 22 || currentHour < 6) {
+            return;
         }
 
         console.log('[Cron] Running reminder check...');
