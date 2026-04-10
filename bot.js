@@ -267,8 +267,20 @@ client.on('message', async (msg) => {
         else if (state === 'CHOOSING_DATE_INIT') {
             const date = await parseDate(body, moment().format('YYYY-MM-DD'));
             if (date) {
-                const formattedDate = moment(date).format('DD/MM/YYYY');
-                const dayName = moment(date).locale('es').format('dddd');
+                const parsedMoment = moment(date);
+                if (parsedMoment.day() === 0) {
+                    await humanReply(msg, getRandomMsg([
+                        "Ay hermosa, los domingos descansamos ✨. ¿Te gustaría agendar para el lunes o cualquier otro día?",
+                        "Princesa, los domingos no laboramos 🌸. Dime qué otro día de la semana te sirve para dejarte divina.",
+                        "Linda, los domingos cerramos para descansar 💖. ¿Buscamos un huequito el sábado o el lunes?",
+                        "Reina, los domingos no atendemos 🌷. Porfa dime otro día que te quede súper bien.",
+                        "Nena, el domingo es nuestro día libre 🎀. Pero el lunes arrancamos con toda, ¿te agendo para otro día?"
+                    ]));
+                    return;
+                }
+                
+                const formattedDate = parsedMoment.format('DD/MM/YYYY');
+                const dayName = parsedMoment.locale('es').format('dddd');
                 sessions[from].state = 'CONFIRMING_DATE';
                 sessions[from].tempDate = date;
                 await humanReply(msg, getRandomMsg([
@@ -458,9 +470,24 @@ async function startChoosingSlot(msg, from, date) {
 }
 
 function startReminderCron() {
-    console.log('[Cron] Reminder cron job started. Checking every 5 minutes.');
-    // Run every 5 minutes to catch same-day bookings promptly
-    cron.schedule('*/5 * * * *', async () => {
+    console.log('[Cron] Reminder cron job started. Checking every 15 minutes.');
+    // Run every 15 minutes to save ticks
+    cron.schedule('*/15 * * * *', async () => {
+        const now = moment();
+        const currentHour = now.hour();
+        const currentDay = now.day();
+
+        // No evaluar recordatorios los domingos
+        if (currentDay === 0) return;
+
+        // Después de las 10 PM (22) y antes de las 7 AM (7), validar solo cada 3 horas para "ahorrar" pings
+        if (currentHour >= 22 || currentHour < 7) {
+            // Solo correr a las 22:00, 1:00 y 4:00 (módulo 3) y restringir a los minutos 0
+            if (now.minute() > 14 || (currentHour % 3 !== 1 && currentHour !== 22 && currentHour !== 4)) {
+                return;
+            }
+        }
+
         console.log('[Cron] Running reminder check...');
         try {
             const reminders = await getUpcomingReminders();
