@@ -73,16 +73,18 @@ body {
 }
 
 .logo .brand-text {
-  font-family: 'Great Vibes', cursive;
-  font-size: 34px;
-  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   background: linear-gradient(45deg, #FF3399, #FF99CC);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0px 2px 4px rgba(255, 102, 178, 0.4));
   line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .nav-links {
@@ -437,7 +439,7 @@ body {
     flex-wrap: wrap; 
   }
   .logo .brand-text {
-    font-size: 28px;
+    font-size: 20px;
   }
   .nav-links { display: flex; overflow-x: auto; gap: 10px; }
   .nav-links li { white-space: nowrap; margin-bottom: 0; }
