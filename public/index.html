@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Barbara Beauty Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FullCalendar JS & CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                <svg width="60" height="45" viewBox="0 0 100 100">
+                  <!-- Spoolie Brush -->
+                  <g transform="translate(-5, 0)">
+                    <line x1="20" y1="90" x2="20" y2="40" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M5 40 L35 40 M7 30 L33 30 M10 20 L30 20 M12 10 L28 10 M7 35 L33 35 M10 25 L30 25 M12 15 L28 15" stroke="#FF66B2" stroke-width="4" stroke-linecap="round"/>
+                  </g>
+                  <!-- Comb -->
+                  <g transform="translate(25, 0)">
+                    <line x1="20" y1="90" x2="20" y2="40" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+                    <rect x="22" y="10" width="8" height="30" fill="#333" rx="2" />
+                    <path d="M30 12 L38 12 M30 16 L38 16 M30 20 L38 20 M30 24 L38 24 M30 28 L38 28 M30 32 L38 32 M30 36 L38 36" stroke="#333" stroke-width="2"/>
+                  </g>
+                  <!-- Tweezers -->
+                  <g transform="translate(50, 0)">
+                    <path d="M10 90 C 20 40, 25 10, 30 5 L 35 15 C 25 40, 15 90, 10 90 Z" fill="#999"/>
+                    <path d="M22 90 C 28 40, 32 10, 35 5 L 40 15 C 32 40, 26 90, 22 90 Z" fill="#888"/>
+                  </g>
+                </svg>
+                <span>BARBARA BEAUTY</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" onclick="showTab('calendar')">📅 Calendario</li>
+                <li onclick="showTab('manager')">🤖 Manager AI</li>
+                <li class="refresh-container">
+                    <button class="refresh-btn" onclick="refreshSchedule()" title="Actualizar Calendario">🔄</button>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p>Status: <span id="status" class="online">● Online</span></p>
+                <p class="brand-footer">Barbara Beauty Manager</p>
+            </div>
+        </nav>
+
+        <!-- Main Content area -->
+        <main class="content">
+            <!-- CALENDAR TAB -->
+            <section id="calendar-tab" class="tab-content active">
+                <header class="tab-header">
+                    <h1>Tu Agenda de Hoy</h1>
+                    <p class="subtitle">Gestiona tus turnos y disponibilidad.</p>
+                </header>
+                <div id="calendar-container">
+                    <div id="calendar"></div>
+                </div>
+            </section>
+
+            <!-- MANAGER AI TAB -->
+            <section id="manager-tab" class="tab-content">
+                <header class="tab-header">
+                    <h1>Habla con tu Asistente AI</h1>
+                    <p class="subtitle">Dile a tu agente qué horarios quieres bloquear/desbloquear.</p>
+                </header>
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message bot">
+                            <p>¡Hola! Soy tu asistente. ¿En qué te puedo ayudar hoy? Puedes decirme cosas como "Bloquea mañana de 3 a 5 pm".</p>
+                        </div>
+                    </div>
+                    <form id="chat-form" class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Escribe un comando..." autocomplete="off">
+                        <button type="submit">Enviar</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js?v=8"></script>
+</body>
+</html>
