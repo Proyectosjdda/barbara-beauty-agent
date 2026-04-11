@@ -428,20 +428,47 @@ body {
   }
   .nav-links { display: flex; overflow-x: auto; gap: 10px; }
   .nav-links li { white-space: nowrap; margin-bottom: 0; }
-  .content { padding: 20px; }
-  #calendar-container { padding: 15px; }
+  .content { padding: 15px; }
+  #calendar-container { padding: 10px; }
   .chat-container { height: 70vh; }
-}
 
- . s u m m a r e - e v e n t   { 
-          t e x t - a l i g n :   c e n t e r ; 
-          f o n t - w e i g h t :   8 0 0 ; 
-          f o n t - s i z e :   1 4 p x ; 
-          l e t t e r - s p a c i n g :   0 . 5 p x ; 
-          p a d d i n g :   8 p x   0 ; 
-          t e x t - t r a n s f o r m :   u p p e r c a s e ; 
-  } 
-  . s u m m a r e - e v e n t : h o v e r   { 
-          b a c k g r o u n d :   t r a n s p a r e n t   ! i m p o r t a n t ; 
-          t r a n s f o r m :   s c a l e ( 1 . 0 5 ) ; 
-  } 
+  /* Increase Day View slot height on mobile */
+  .fc-timegrid-slot {
+      height: 70px !important;
+  }
+  .fc-event-main-container {
+      padding: 5px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 5px !important;
+  }
+  .fc-event-title-container {
+      font-size: 12px !important;
+      white-space: normal !important;
+  }
+  .event-actions {
+      margin-top: 5px;
+      gap: 15px !important;
+  }
+  .event-actions button {
+      padding: 8px !important;
+      font-size: 16px !important;
+  }
+  
+  /* Month View Badge Styles */
+  .summary-event {
+      background-color: var(--brand-color) !important;
+      border-radius: 20px !important;
+      color: #fff !important;
+      padding: 2px 8px !important;
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      text-align: center !important;
+      margin: 2px !important;
+      display: inline-block !important;
+      width: auto !important;
+  }
+  .fc-daygrid-event-harness {
+      text-align: center;
+  }
+}

@@ -115,13 +115,14 @@ function initCalendar() {
                         }
                     });
                     
+                    const isMobile = window.innerWidth < 600;
                     const events = Object.keys(counts).map(date => ({
-                        title: `${counts[date]} turnos agendados`,
+                        title: isMobile ? `${counts[date]} ${counts[date] === 1 ? 'turno' : 'turnos'}` : `${counts[date]} turnos agendados`,
                         start: date,
                         allDay: true,
                         backgroundColor: 'transparent',
                         borderColor: 'transparent',
-                        textColor: '#FF2E63',
+                        textColor: '#fff',
                         className: 'summary-event'
                     }));
                     successCallback(events);
