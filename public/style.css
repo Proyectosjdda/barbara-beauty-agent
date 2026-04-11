@@ -28,10 +28,6 @@
 
 body {
   background-color: var(--bg-primary);
-  background-image: 
-    linear-gradient(rgba(255,46,99,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,46,99,0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
   color: var(--text-main);
   height: 100vh;
   overflow: hidden;
