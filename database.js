@@ -32,6 +32,7 @@ function initDb() {
             // Add reminder_sent and service columns to existing tables (migration)
             db.run(`ALTER TABLE appointments ADD COLUMN reminder_sent INTEGER DEFAULT 0`, () => {});
             db.run(`ALTER TABLE appointments ADD COLUMN service TEXT`, () => {});
+            db.run(`ALTER TABLE appointments ADD COLUMN voucher_url TEXT`, () => {});
 
             // Table for availability slots
             // is_occupied: 0 = Free, 1 = Booked, 2 = Blocked by Manager
@@ -73,7 +74,7 @@ function getAvailableSlots(date) {
     });
 }
 
-function bookSlot(name, phone, date, time, service) {
+function bookSlot(name, phone, date, time, service, voucher_url = null) {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
             db.get("SELECT is_occupied FROM availability WHERE date = ? AND time = ?", [date, time], (err, row) => {
@@ -84,7 +85,7 @@ function bookSlot(name, phone, date, time, service) {
 
                 db.run("BEGIN TRANSACTION");
                 db.run("UPDATE availability SET is_occupied = 1 WHERE date = ? AND time = ?", [date, time]);
-                db.run("INSERT INTO appointments (name, phone, date, time, service) VALUES (?, ?, ?, ?, ?)", [name, phone, date, time, service]);
+                db.run("INSERT INTO appointments (name, phone, date, time, service, voucher_url) VALUES (?, ?, ?, ?, ?, ?)", [name, phone, date, time, service, voucher_url]);
                 db.run("COMMIT", (err) => {
                     if (err) {
                         db.run("ROLLBACK");
@@ -131,7 +132,7 @@ function getDaySchedule(date) {
     return new Promise(async (resolve, reject) => {
         await ensureSlotsExist(date);
         db.all(`
-            SELECT a.time, a.is_occupied, app.name, app.phone, app.service 
+            SELECT a.time, a.is_occupied, app.name, app.phone, app.service, app.voucher_url 
             FROM availability a
             LEFT JOIN appointments app ON a.date = app.date AND a.time = app.time
             WHERE a.date = ?
@@ -230,11 +231,11 @@ function getUpcomingAppointmentsByWhatsApp(phone) {
 function getRangeSchedule(startDate, endDate) {
     return new Promise((resolve, reject) => {
         db.all(`
-            SELECT date, time, 1 as is_occupied, name, phone, service 
+            SELECT date, time, 1 as is_occupied, name, phone, service, voucher_url 
             FROM appointments 
             WHERE status='CONFIRMED' AND date >= ? AND date < ?
             UNION ALL
-            SELECT date, time, 2 as is_occupied, null as name, null as phone, null as service 
+            SELECT date, time, 2 as is_occupied, null as name, null as phone, null as service, null as voucher_url 
             FROM availability 
             WHERE is_occupied = 2 AND date >= ? AND date < ?
         `, [startDate, endDate, startDate, endDate], (err, rows) => {

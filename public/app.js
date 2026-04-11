@@ -174,6 +174,8 @@ function initCalendar() {
         },
         eventContent: function(arg) {
             const isBlocked = arg.event.extendedProps.status === 2;
+            const voucherUrl = arg.event.extendedProps.voucher_url;
+
             const container = document.createElement('div');
             container.className = 'fc-event-main-container';
             container.style.display = 'flex';
@@ -181,11 +183,20 @@ function initCalendar() {
             container.style.alignItems = 'center';
             container.style.width = '100%';
             
+            // Add click listener to container to toggle tools on mobile
+            container.onclick = (e) => {
+                const tools = container.querySelector('.event-actions');
+                if (tools) {
+                    const isVisible = tools.style.opacity === '1';
+                    tools.style.opacity = isVisible ? '0' : '1';
+                    tools.style.pointerEvents = isVisible ? 'none' : 'auto';
+                }
+            };
+
             const textContent = document.createElement('div');
             textContent.style.display = 'flex';
-            textContent.style.flexDirection = 'row';
-            textContent.style.alignItems = 'center';
-            textContent.style.gap = '15px';
+            textContent.style.flexDirection = 'column'; // Better for mobile names
+            textContent.style.alignItems = 'flex-start';
             textContent.style.overflow = 'hidden';
 
             const title = document.createElement('div');
@@ -196,13 +207,22 @@ function initCalendar() {
             if (!isBlocked) {
                 const serviceRaw = arg.event.extendedProps.service;
                 if (serviceRaw) {
-                    const svcTitle = document.createElement('div');
-                    svcTitle.innerText = `| 💅 ${serviceRaw}`;
-                    svcTitle.style.fontSize = '14px';
-                    svcTitle.style.fontWeight = 'bold';
-                    svcTitle.style.color = '#000';
-                    svcTitle.style.whiteSpace = 'nowrap';
-                    textContent.appendChild(svcTitle);
+                    const svcLine = document.createElement('div');
+                    svcLine.innerText = `💅 ${serviceRaw}`;
+                    svcLine.style.fontSize = '12px';
+                    svcLine.style.color = '#333';
+                    textContent.appendChild(svcLine);
+                }
+
+                if (voucherUrl) {
+                    const vBtn = document.createElement('button');
+                    vBtn.className = 'voucher-btn';
+                    vBtn.innerHTML = '🖼️ Pago';
+                    vBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        window.open(voucherUrl, '_blank');
+                    };
+                    textContent.appendChild(vBtn);
                 }
             }
 
@@ -215,35 +235,22 @@ function initCalendar() {
                 // Edit Button
                 const editBtn = document.createElement('button');
                 editBtn.innerHTML = '✏️';
-                editBtn.title = 'Editar';
-                editBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    editAppointment(arg.event);
-                };
+                editBtn.onclick = (e) => { e.stopPropagation(); editAppointment(arg.event); };
                 
                 // Delete Button
                 const delBtn = document.createElement('button');
                 delBtn.innerHTML = '🗑️';
-                delBtn.title = 'Eliminar';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    deleteAppointment(arg.event);
-                };
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteAppointment(arg.event); };
 
                 actions.appendChild(editBtn);
                 actions.appendChild(delBtn);
                 container.appendChild(actions);
             } else {
-                // For blocked slots, just a Delete (Unblock) button
                 const actions = document.createElement('div');
                 actions.className = 'event-actions';
                 const unblockBtn = document.createElement('button');
                 unblockBtn.innerHTML = '🔓';
-                unblockBtn.title = 'Desbloquear';
-                unblockBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    unblockSlotManual(arg.event);
-                };
+                unblockBtn.onclick = (e) => { e.stopPropagation(); unblockSlotManual(arg.event); };
                 actions.appendChild(unblockBtn);
                 container.appendChild(actions);
             }

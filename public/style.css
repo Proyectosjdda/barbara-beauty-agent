@@ -438,47 +438,73 @@ body {
   }
   .nav-links { display: flex; overflow-x: auto; gap: 10px; }
   .nav-links li { white-space: nowrap; margin-bottom: 0; }
-  .content { padding: 15px; }
-  #calendar-container { padding: 10px; }
+  .content { padding: 10px; width: 100%; overflow-x: hidden; }
+  #calendar-container { padding: 5px; width: 100%; }
   .chat-container { height: 70vh; }
 
-  /* Increase Day View slot height on mobile */
+  /* Day View Fixes */
   .fc-timegrid-slot {
-      height: 70px !important;
+      height: 80px !important;
   }
   .fc-event-main-container {
-      padding: 5px !important;
+      padding: 4px !important;
       flex-direction: column !important;
       align-items: flex-start !important;
-      gap: 5px !important;
+      gap: 3px !important;
+      overflow: hidden;
   }
   .fc-event-title-container {
-      font-size: 12px !important;
+      font-size: 11px !important;
+      line-height: 1.2 !important;
       white-space: normal !important;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
   }
   .event-actions {
-      margin-top: 5px;
-      gap: 15px !important;
+      margin-top: 2px;
+      gap: 12px !important;
+      width: 100%;
+      justify-content: flex-start;
   }
   .event-actions button {
-      padding: 8px !important;
-      font-size: 16px !important;
+      padding: 6px !important;
+      font-size: 14px !important;
   }
   
-  /* Month View Badge Styles */
+  /* Month View Badge Fixes */
   .summary-event {
-      background-color: var(--brand-color) !important;
-      border-radius: 20px !important;
-      color: #fff !important;
-      padding: 2px 8px !important;
-      font-size: 11px !important;
-      font-weight: 800 !important;
-      text-align: center !important;
-      margin: 2px !important;
-      display: inline-block !important;
-      width: auto !important;
+      border-radius: 4px !important;
+      padding: 1px 4px !important;
+      font-size: 10px !important;
+      margin: 1px 0 !important;
+      max-width: 95%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block !important;
   }
-  .fc-daygrid-event-harness {
-      text-align: center;
+  .fc-daygrid-day-events {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }
+
+/* Voucher Button Style */
+.voucher-btn {
+    background: #FF66B2;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 4px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.voucher-btn:hover { background: #FF2E63; }

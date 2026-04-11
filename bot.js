@@ -63,14 +63,43 @@ function formatTime12h(time24h) {
 setInterval(() => {
     const now = Date.now();
     for (const from in sessions) {
-        // Option to extend timeout to 5 minutes specifically for CHOOSING_SERVICE
-        const timeout = sessions[from].state === 'CHOOSING_SERVICE' ? 5 * 60 * 1000 : SESSION_TIMEOUT_MS;
+        // Dynamic timeouts based on state
+        let timeout = SESSION_TIMEOUT_MS;
+        if (sessions[from].state === 'CHOOSING_SERVICE') {
+            timeout = 5 * 60 * 1000; // 5 minutes
+        } else if (sessions[from].state === 'WAITING_PAYMENT_VOUCHER') {
+            timeout = 7 * 60 * 1000; // 7 minutes
+        }
+
         if (now - sessions[from].lastInteraction > timeout) {
             console.log(`[WhatsApp] Session timed out for ${from} (State: ${sessions[from].state})`);
             delete sessions[from];
         }
     }
 }, 30000); // Check every 30 seconds
+
+// Price mapping for 40% deposit (Placeholders for missing values)
+const SERVICE_PRICES = {
+    "Soft Brows": 40000,
+    "Luxe Lift Brows": 90000,
+    "Clean Shape": 20000,
+    "Lash Bloom": 100000,
+    "Wispy Look": 165000,
+    "Kim-K Look": 170000,
+    "Comics Look": 170000,
+    "Foxy Tech": 145000,
+    // Default prices for services without specified values
+    "Classic Glow": 120000,
+    "Deep Black Lash": 130000,
+    "Glam Lash": 150000,
+    "Tech Lash W 3D": 140000,
+    "Tech Lash W 4D": 145000,
+    "Tech Lash YY": 140000,
+    "Tech Lash W 5D": 150000,
+    "Tech Lash Coffee": 150000,
+    "Curva U": 160000,
+    "Retoque": 0 
+};
 
 client.on('qr', (qr) => {
     console.log('\n=================================================');
@@ -305,14 +334,13 @@ client.on('message', async (msg) => {
         else if (state === 'CONFIRMING_DATE') {
             const cleanBody = body.toLowerCase().trim();
             if (cleanBody === '1' || cleanBody.includes('si')) {
-                sessions[from].state = 'CHOOSING_SERVICE';
+                sessions[from].state = 'CHOOSING_FLOW_TYPE';
                 await humanReply(msg, getRandomMsg([
-                    `¡Perfecto! ¿Qué categoría de servicio buscas hoy hermosa? ✨\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
-                    `¡Anotado! Cuéntame nena, ¿en qué categoría nos enfocamos hoy?\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
-                    `¡Listo princesa! Ayúdame escogiendo una categoría para ver opciones:\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
-                    `Super linda. Ahora dime, ¿cuál de estas categorías te interesa?\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
-                    `¡Excelente reina! Elige aquí la categoría para mostrarte los servicios:\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`
+                    `¡Perfecto hermosa! Antes de ver los servicios, cuéntame:\n\n1. Es mi Montura por Primera Vez ✨\n2. Es un Retoque 🌸`,
+                    `¡Anotado nena! ¿Deseas agendar:\n\n1. Montura Primera Vez\n2. Un Retoque del servicio?`,
+                    `¡Listo princesa! Ayúdame con esto porfi:\n\n1. Voy por primera vez\n2. Ya tengo el servicio y vengo a retoque`
                 ]));
+            } else {
             } else {
                 sessions[from].state = 'CHOOSING_DATE_INIT';
                 await humanReply(msg, getRandomMsg([
@@ -324,8 +352,23 @@ client.on('message', async (msg) => {
                 ]));
             }
         }
+        else if (state === 'CHOOSING_FLOW_TYPE') {
+            const cleanBody = body.toLowerCase().trim();
+            if (cleanBody === '1' || cleanBody.includes('primera')) {
+                sessions[from].flowType = 'PRIMERA_VEZ';
+                sessions[from].state = 'CHOOSING_SERVICE';
+                await humanReply(msg, "¡Qué emoción nena! Como es tu primera vez, ¿qué servicio deseas realizarte? ✨\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
+            } else if (cleanBody === '2' || cleanBody.includes('retoque')) {
+                sessions[from].flowType = 'RETOQUE';
+                sessions[from].state = 'CHOOSING_SERVICE';
+                await humanReply(msg, "¿Súper! ¿Un retoque de cuál servicio te vas a realizar hermosa? 🌸\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
+            } else {
+                await humanReply(msg, "Por favor elige 1 o 2 hermosa ✨");
+            }
+        }
         else if (state === 'CHOOSING_SERVICE') {
             const option = parseInt(body);
+            const isRetoque = sessions[from].flowType === 'RETOQUE';
             
             if (option === 1) {
                 // User wants to see the catalog
@@ -334,35 +377,32 @@ client.on('message', async (msg) => {
                     if (fs.existsSync(catalogPath)) {
                         const media = MessageMedia.fromFilePath(catalogPath);
                         await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios hermosa ✨' });
-                        await humanReply(msg, "¿Y bien nena? ¿Cuál de estas categorías te interesa ahora?\n\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀");
+                        await humanReply(msg, `¿Y bien nena? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
                     } else {
-                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento. Pero aquí tienes las categorías:\n\n2. Retoque\n3. Diseño de Cejas... (etc)");
+                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento.");
                     }
                 } catch (err) {
                     console.error("Error sending catalog:", err);
                     await humanReply(msg, "Hubo un problemita enviando el archivo nena, pero dime qué categoría te interesa 🌸");
                 }
             } else if (option === 2) {
-                sessions[from].service = "Retoque";
-                await startChoosingSlot(msg, from, sessions[from].tempDate);
-            } else if (option === 3) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'CEJAS';
-                await humanReply(msg, "Perfecto, ¿qué diseño de cejas te gustaría? ✨:\n\n1️⃣ Soft Brows (diseño + pigmentación) – $40.000\n2️⃣ Luxe Lift Brows (laminado) – $90.000\n3️⃣ Clean Shape (solo diseño) – $20.000\n\nResponde con el numerito hermosa 💖");
-            } else if (option === 4) {
+                await humanReply(msg, `Perfecto, ¿qué diseño de cejas ${isRetoque ? '(Retoque)' : ''} te gustaría? ✨:\n\n1️⃣ Soft Brows (diseño + pigmentación)\n2️⃣ Luxe Lift Brows (laminado)\n3️⃣ Clean Shape (solo diseño)\n\nResponde con el numerito hermosa 💖`);
+            } else if (option === 3) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'EXTENSIONES';
-                await humanReply(msg, "¡Me encanta esa opción! ¿Qué estilo de extensiones prefieres? 👁️:\n\n1️⃣ Lash Bloom (lifting) – $100.000\n2️⃣ Classic Glow (natural)\n3️⃣ Deep Black Lash (efecto pestañina)\n4️⃣ Glam Lash (volumen ruso)\n\nDime el número princesa ✨");
-            } else if (option === 5) {
+                await humanReply(msg, `¡Me encanta esa opción! ¿Qué estilo de extensiones ${isRetoque ? '(Retoque)' : ''} prefieres? 👁️:\n\n1️⃣ Lash Bloom (lifting)\n2️⃣ Classic Glow (natural)\n3️⃣ Deep Black Lash (efecto pestañina)\n4️⃣ Glam Lash (volumen ruso)\n\nDime el número princesa ✨`);
+            } else if (option === 4) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'TECNOLOGICAS';
-                await humanReply(msg, "¡Lo último en tendencia! ¿Cuál te gustaría hoy? 🧬:\n\n1️⃣ Tech Lash W 3D\n2️⃣ Tech Lash W 4D\n3️⃣ Tech Lash YY\n4️⃣ Tech Lash W 5D\n5️⃣ Tech Lash Coffee\n6️⃣ Curva U (U-Sharp Fan)\n\nMándame tu número favorito 🌷");
-            } else if (option === 6) {
+                await humanReply(msg, `¡Lo último en tendencia! ¿Cuál te gustaría hoy ${isRetoque ? '(Retoque)' : ''}? 🧬:\n\n1️⃣ Tech Lash W 3D\n2️⃣ Tech Lash W 4D\n3️⃣ Tech Lash YY\n4️⃣ Tech Lash W 5D\n5️⃣ Tech Lash Coffee\n6️⃣ Curva U (U-Sharp Fan)\n\nMándame tu número favorito 🌷`);
+            } else if (option === 5) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'EFECTOS';
-                await humanReply(msg, "¡Para lucir espectacular! ¿Qué efecto especial quieres? 🎀:\n\n1️⃣ Wispy Look – $165.000\n2️⃣ Kim-K Look – $170.000\n3️⃣ Comics Look – $170.000\n4️⃣ Foxy Tech – $145.000\n\nElige con el numerito reina ✨");
+                await humanReply(msg, `¡Para lucir espectacular! ¿Qué efecto especial ${isRetoque ? '(Retoque)' : ''} quieres? 🎀:\n\n1️⃣ Wispy Look\n2️⃣ Kim-K Look\n3️⃣ Comics Look\n4️⃣ Foxy Tech\n\nElige con el numerito reina ✨`);
             } else {
-                await humanReply(msg, "Por favor elige una opción del 1 al 6 hermosa 🌸");
+                await humanReply(msg, "Por favor elige una opción del 1 al 5 hermosa 🌸");
             }
         }
         else if (state === 'CHOOSING_SUB_SERVICE') {
@@ -386,9 +426,41 @@ client.on('message', async (msg) => {
 
             if (selectedService) {
                 sessions[from].service = selectedService;
-                await startChoosingSlot(msg, from, sessions[from].tempDate);
+                
+                if (sessions[from].flowType === 'PRIMERA_VEZ') {
+                    const price = SERVICE_PRICES[selectedService] || 0;
+                    const deposit = Math.round(price * 0.4);
+                    const depositText = price > 0 ? `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ($${deposit.toLocaleString()}) ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*` : `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
+                    
+                    sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
+                    await humanReply(msg, `¡Excelente elección nena! 💖 Para asegurar tu primera cita, tenemos esta política de reserva:\n\n${depositText}\n\n*ESTAS SON LAS OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes 7 minutos para enviarlo antes de que se cierre el turno)`);
+                } else {
+                    // Retoque: direct to slots
+                    await startChoosingSlot(msg, from, sessions[from].tempDate);
+                }
             } else {
                 await humanReply(msg, "Esa opción no es válida nena, por favor elige un número de la lista que te mandé arribita 🌸");
+            }
+        }
+        else if (state === 'WAITING_PAYMENT_VOUCHER') {
+            if (msg.hasMedia) {
+                try {
+                    const media = await msg.downloadMedia();
+                    if (media) {
+                        const filename = `voucher_${from.split('@')[0]}_${Date.now()}.jpg`;
+                        const savePath = path.join(__dirname, 'public', 'vouchers', filename);
+                        fs.writeFileSync(savePath, media.data, { encoding: 'base64' });
+                        
+                        sessions[from].voucherUrl = `/vouchers/${filename}`;
+                        await humanReply(msg, "¡Recibido hermosa! ✨ Gracias por enviar el comprobante. Ahora sí, vamos a elegir tu hora preferida:");
+                        await startChoosingSlot(msg, from, sessions[from].tempDate);
+                    }
+                } catch (err) {
+                    console.error("Error downloading voucher:", err);
+                    await humanReply(msg, "Hubo un problemita guardando la imagen nena, ¿podrías enviarla de nuevo porfa? 🌸");
+                }
+            } else {
+                await humanReply(msg, "Por favor hermosa, *envía el soporte de transferencia en una foto* para poder continuar con tu agendamiento 💖. Sin el comprobante no puedo separar tu cupo.");
             }
         }
         else if (state === 'CHOOSING_SLOT') {
@@ -454,7 +526,7 @@ client.on('message', async (msg) => {
             if (cleanBody === '1' || cleanBody.includes('si') || cleanBody.includes('súper bien') || cleanBody.includes('perfecto')) {
                 const context = sessions[from];
                 const phone = context.extractedPhone;
-                const result = await bookSlot(context.name, phone, context.tempDate, context.time, context.service);
+                const result = await bookSlot(context.name, phone, context.tempDate, context.time, context.service, context.voucherUrl);
 
                 if (result.success) {
                     const timeStr = formatTime12h(context.time);
