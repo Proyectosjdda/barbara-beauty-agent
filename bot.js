@@ -1,5 +1,5 @@
 process.env.TZ = 'America/Bogota';
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const moment = require('moment');
 const { detectActionIntent, parseDate } = require('./intentService');
@@ -63,8 +63,10 @@ function formatTime12h(time24h) {
 setInterval(() => {
     const now = Date.now();
     for (const from in sessions) {
-        if (now - sessions[from].lastInteraction > SESSION_TIMEOUT_MS) {
-            console.log(`[WhatsApp] Session timed out for ${from}`);
+        // Option to extend timeout to 5 minutes specifically for CHOOSING_SERVICE
+        const timeout = sessions[from].state === 'CHOOSING_SERVICE' ? 5 * 60 * 1000 : SESSION_TIMEOUT_MS;
+        if (now - sessions[from].lastInteraction > timeout) {
+            console.log(`[WhatsApp] Session timed out for ${from} (State: ${sessions[from].state})`);
             delete sessions[from];
         }
     }
@@ -305,11 +307,11 @@ client.on('message', async (msg) => {
             if (cleanBody === '1' || cleanBody.includes('si')) {
                 sessions[from].state = 'CHOOSING_SERVICE';
                 await humanReply(msg, getRandomMsg([
-                    `¡Perfecto! ¿Qué servicio deseas realizarte hermosa?\n\n1. Montura Primera Vez\n2. Retoque\n3. Laminado de cejas\n4. Laminado y pestañas\n5. Lifting\n6. Cejas`,
-                    `¡Anotado! Cuéntame nena, ¿qué nos vamos a hacer para quedar más bellas?\n\n1. Montura Primera Vez\n2. Retoque\n3. Laminado de cejas\n4. Laminado y pestañas\n5. Lifting\n6. Cejas`,
-                    `¡Listo princesa! Ayúdame escogiendo el servicio que buscas:\n\n1. Montura Primera Vez\n2. Retoque\n3. Laminado de cejas\n4. Laminado y pestañas\n5. Lifting\n6. Cejas`,
-                    `Super linda. Ahora dime, ¿cuál de estos servicios te gustaría hacerte?\n\n1. Montura Primera Vez\n2. Retoque\n3. Laminado de cejas\n4. Laminado y pestañas\n5. Lifting\n6. Cejas`,
-                    `¡Excelente reina! Elige aquí abajito el servicio que te quieres hacer:\n\n1. Montura Primera Vez\n2. Retoque\n3. Laminado de cejas\n4. Laminado y pestañas\n5. Lifting\n6. Cejas`
+                    `¡Perfecto! ¿Qué servicio deseas realizarte hermosa?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
+                    `¡Anotado! Cuéntame nena, ¿qué nos vamos a hacer para quedar más bellas?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
+                    `¡Listo princesa! Ayúdame escogiendo el servicio que buscas:\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
+                    `Super linda. Ahora dime, ¿cuál de estos servicios te gustaría hacerte?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
+                    `¡Excelente reina! Elige aquí abajito el servicio que te quieres hacer:\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`
                 ]));
             } else {
                 sessions[from].state = 'CHOOSING_DATE_INIT';
@@ -325,16 +327,33 @@ client.on('message', async (msg) => {
         else if (state === 'CHOOSING_SERVICE') {
             const option = parseInt(body);
             const services = ["Montura Primera Vez", "Retoque", "Laminado de cejas", "Laminado y pestañas", "Lifting", "Cejas"];
-            if (option >= 1 && option <= 6) {
-                sessions[from].service = services[option - 1];
+            
+            if (option === 1) {
+                // User wants to see the catalog
+                try {
+                    const catalogPath = path.join(__dirname, 'public', 'catalogo.pdf');
+                    if (fs.existsSync(catalogPath)) {
+                        const media = MessageMedia.fromFilePath(catalogPath);
+                        await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios hermosa ✨' });
+                        // Re-prompt after sending catalog
+                        await humanReply(msg, "¿Y bien nena? ¿Cuál de estos servicios te gustaría agendar ahora?\n\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas");
+                    } else {
+                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento. Pero aquí tienes los servicios:\n\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas... (etc)");
+                    }
+                } catch (err) {
+                    console.error("Error sending catalog:", err);
+                    await humanReply(msg, "Hubo un problemita enviando el archivo, pero dime qué servicio quieres agendar 🌸");
+                }
+            } else if (option >= 2 && option <= 7) {
+                sessions[from].service = services[option - 2]; // Offset by 2 now
                 await startChoosingSlot(msg, from, sessions[from].tempDate);
             } else {
                 await humanReply(msg, getRandomMsg([
-                    'Por favor elige un numerito del 1 al 6 hermosa 🌸',
-                    'Uy nena, ese numerito no es. Envíame sólo el número entre el 1 y el 6 ✨',
-                    'Princesa, elige con el número de la lista para que sea más fácil 💖',
-                    'Linda, ese no lo encuentro. Escribe un número válido (1-6) 🌷',
-                    'Hermosa, márcame con el número del 1 al 6 qué te quieres hacer 🎀'
+                    'Por favor elige un numerito del 1 al 7 hermosa 🌸',
+                    'Uy nena, ese numerito no es. Envíame sólo el número entre el 1 y el 7 ✨',
+                    'Princesa, elige con el número de la lista (1 para ver catálogo) 💖',
+                    'Linda, ese no lo encuentro. Escribe un número válido (1-7) 🌷',
+                    'Hermosa, márcame con el número del 1 al 7 qué te quieres hacer 🎀'
                 ]));
             }
         }
