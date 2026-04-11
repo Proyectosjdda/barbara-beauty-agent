@@ -424,6 +424,49 @@ body {
 }
 
 /* Mobile Responsiveness */
+/* List View Custom Styling */
+.fc-list {
+    border: none !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+.fc-list-day-cushion {
+    background-color: var(--brand-color) !important;
+    color: white !important;
+    font-weight: bold;
+    padding: 10px 15px !important;
+}
+.fc-list-event {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.fc-list-event:hover {
+    background: #FFF0F5 !important;
+}
+.fc-list-event-time {
+    color: var(--brand-color) !important;
+    font-weight: bold;
+    font-size: 15px;
+    width: 100px;
+}
+.fc-list-event-title {
+    padding: 12px 15px !important;
+}
+.fc-list-event-dot {
+    border-color: var(--brand-color) !important;
+}
+.fc-list-table {
+    border-collapse: separate;
+    border-spacing: 0 4px;
+}
+.fc-list-event td {
+    border-top: 1px solid #FFE4E1 !important;
+    border-bottom: 1px solid #FFE4E1 !important;
+}
+.fc-list-event td:first-child { border-left: 1px solid #FFE4E1 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.fc-list-event td:last-child { border-right: 1px solid #FFE4E1 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
 @media screen and (max-width: 900px) {
   body { overflow-y: auto; height: auto; }
   .app-container { flex-direction: column; height: auto; min-height: 100vh; }

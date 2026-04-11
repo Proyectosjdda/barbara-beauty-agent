@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initCalendar() {
     const calendarEl = document.getElementById('calendar');
     calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridDay',
+        initialView: 'listDay',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'timeGridDay,dayGridMonth'
+            right: 'listDay,dayGridMonth'
         },
         buttonText: {
             today: 'Hoy',
@@ -152,7 +152,7 @@ function initCalendar() {
         },
         dateClick: async function(info) {
             if (info.view.type === 'dayGridMonth') {
-                calendar.changeView('timeGridDay', info.dateStr);
+                calendar.changeView('listDay', info.dateStr);
                 setTimeout(() => loadSchedule(), 50);
                 return;
             }
