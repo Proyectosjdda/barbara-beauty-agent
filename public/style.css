@@ -448,7 +448,7 @@ body {
     color: var(--brand-color) !important;
     font-weight: bold;
     font-size: 15px;
-    width: 100px;
+    width: 90px;
 }
 .fc-list-event-title {
     padding: 12px 15px !important;
@@ -494,16 +494,28 @@ body {
       flex-direction: column !important;
       align-items: flex-start !important;
       gap: 3px !important;
-      overflow: hidden;
+      overflow: visible !important; /* Permitir que se vea todo */
   }
   .fc-event-title-container {
-      font-size: 11px !important;
-      line-height: 1.2 !important;
+      font-size: 12px !important;
+      line-height: 1.3 !important;
       white-space: normal !important;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      word-wrap: break-word !important; /* Forzar ajuste de palabra */
+      display: block !important;
+      overflow: visible !important;
+  }
+  
+  .fc-list-event-time {
+      width: 70px !important; /* Más angosto en celular */
+      font-size: 13px !important;
+      padding: 5px !important;
+  }
+  .fc-list-event-title {
+      padding: 5px 8px !important;
+  }
+  .fc-list-day-cushion {
+      padding: 8px 10px !important;
+      font-size: 14px;
   }
   .event-actions {
       margin-top: 2px;
