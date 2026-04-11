@@ -307,6 +307,16 @@ body {
 .event-actions {
   display: flex;
   gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.fc-event:hover .event-actions,
+.fc-event:focus .event-actions,
+.fc-event-main-container:active .event-actions {
+  opacity: 1 !important;
+  pointer-events: auto;
 }
 
 .event-actions button {

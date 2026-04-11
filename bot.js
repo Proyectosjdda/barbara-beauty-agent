@@ -307,11 +307,11 @@ client.on('message', async (msg) => {
             if (cleanBody === '1' || cleanBody.includes('si')) {
                 sessions[from].state = 'CHOOSING_SERVICE';
                 await humanReply(msg, getRandomMsg([
-                    `¡Perfecto! ¿Qué servicio deseas realizarte hermosa?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
-                    `¡Anotado! Cuéntame nena, ¿qué nos vamos a hacer para quedar más bellas?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
-                    `¡Listo princesa! Ayúdame escogiendo el servicio que buscas:\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
-                    `Super linda. Ahora dime, ¿cuál de estos servicios te gustaría hacerte?\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`,
-                    `¡Excelente reina! Elige aquí abajito el servicio que te quieres hacer:\n\n1. Ver catálogo de servicios ✨\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas`
+                    `¡Perfecto! ¿Qué categoría de servicio buscas hoy hermosa? ✨\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
+                    `¡Anotado! Cuéntame nena, ¿en qué categoría nos enfocamos hoy?\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
+                    `¡Listo princesa! Ayúdame escogiendo una categoría para ver opciones:\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
+                    `Super linda. Ahora dime, ¿cuál de estas categorías te interesa?\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`,
+                    `¡Excelente reina! Elige aquí la categoría para mostrarte los servicios:\n\n1. Ver catálogo de servicios 📄\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀`
                 ]));
             } else {
                 sessions[from].state = 'CHOOSING_DATE_INIT';
@@ -326,7 +326,6 @@ client.on('message', async (msg) => {
         }
         else if (state === 'CHOOSING_SERVICE') {
             const option = parseInt(body);
-            const services = ["Montura Primera Vez", "Retoque", "Laminado de cejas", "Laminado y pestañas", "Lifting", "Cejas"];
             
             if (option === 1) {
                 // User wants to see the catalog
@@ -335,26 +334,61 @@ client.on('message', async (msg) => {
                     if (fs.existsSync(catalogPath)) {
                         const media = MessageMedia.fromFilePath(catalogPath);
                         await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios hermosa ✨' });
-                        // Re-prompt after sending catalog
-                        await humanReply(msg, "¿Y bien nena? ¿Cuál de estos servicios te gustaría agendar ahora?\n\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas\n5. Laminado y pestañas\n6. Lifting\n7. Cejas");
+                        await humanReply(msg, "¿Y bien nena? ¿Cuál de estas categorías te interesa ahora?\n\n2. Retoque\n3. Diseño de Cejas ✒️\n4. Extensiones de Pestañas 👁️\n5. Pestañas Tecnológicas 🧬\n6. Efectos Especiales 🎀");
                     } else {
-                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento. Pero aquí tienes los servicios:\n\n2. Montura Primera Vez\n3. Retoque\n4. Laminado de cejas... (etc)");
+                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento. Pero aquí tienes las categorías:\n\n2. Retoque\n3. Diseño de Cejas... (etc)");
                     }
                 } catch (err) {
                     console.error("Error sending catalog:", err);
-                    await humanReply(msg, "Hubo un problemita enviando el archivo, pero dime qué servicio quieres agendar 🌸");
+                    await humanReply(msg, "Hubo un problemita enviando el archivo nena, pero dime qué categoría te interesa 🌸");
                 }
-            } else if (option >= 2 && option <= 7) {
-                sessions[from].service = services[option - 2]; // Offset by 2 now
+            } else if (option === 2) {
+                sessions[from].service = "Retoque";
+                await startChoosingSlot(msg, from, sessions[from].tempDate);
+            } else if (option === 3) {
+                sessions[from].state = 'CHOOSING_SUB_SERVICE';
+                sessions[from].category = 'CEJAS';
+                await humanReply(msg, "Perfecto, ¿qué diseño de cejas te gustaría? ✨:\n\n1️⃣ Soft Brows (diseño + pigmentación) – $40.000\n2️⃣ Luxe Lift Brows (laminado) – $90.000\n3️⃣ Clean Shape (solo diseño) – $20.000\n\nResponde con el numerito hermosa 💖");
+            } else if (option === 4) {
+                sessions[from].state = 'CHOOSING_SUB_SERVICE';
+                sessions[from].category = 'EXTENSIONES';
+                await humanReply(msg, "¡Me encanta esa opción! ¿Qué estilo de extensiones prefieres? 👁️:\n\n1️⃣ Lash Bloom (lifting) – $100.000\n2️⃣ Classic Glow (natural)\n3️⃣ Deep Black Lash (efecto pestañina)\n4️⃣ Glam Lash (volumen ruso)\n\nDime el número princesa ✨");
+            } else if (option === 5) {
+                sessions[from].state = 'CHOOSING_SUB_SERVICE';
+                sessions[from].category = 'TECNOLOGICAS';
+                await humanReply(msg, "¡Lo último en tendencia! ¿Cuál te gustaría hoy? 🧬:\n\n1️⃣ Tech Lash W 3D\n2️⃣ Tech Lash W 4D\n3️⃣ Tech Lash YY\n4️⃣ Tech Lash W 5D\n5️⃣ Tech Lash Coffee\n6️⃣ Curva U (U-Sharp Fan)\n\nMándame tu número favorito 🌷");
+            } else if (option === 6) {
+                sessions[from].state = 'CHOOSING_SUB_SERVICE';
+                sessions[from].category = 'EFECTOS';
+                await humanReply(msg, "¡Para lucir espectacular! ¿Qué efecto especial quieres? 🎀:\n\n1️⃣ Wispy Look – $165.000\n2️⃣ Kim-K Look – $170.000\n3️⃣ Comics Look – $170.000\n4️⃣ Foxy Tech – $145.000\n\nElige con el numerito reina ✨");
+            } else {
+                await humanReply(msg, "Por favor elige una opción del 1 al 6 hermosa 🌸");
+            }
+        }
+        else if (state === 'CHOOSING_SUB_SERVICE') {
+            const option = parseInt(body);
+            const category = sessions[from].category;
+            let selectedService = "";
+
+            if (category === 'CEJAS') {
+                const options = ["Soft Brows", "Luxe Lift Brows", "Clean Shape"];
+                if (option >= 1 && option <= 3) selectedService = options[option - 1];
+            } else if (category === 'EXTENSIONES') {
+                const options = ["Lash Bloom", "Classic Glow", "Deep Black Lash", "Glam Lash"];
+                if (option >= 1 && option <= 4) selectedService = options[option - 1];
+            } else if (category === 'TECNOLOGICAS') {
+                const options = ["Tech Lash W 3D", "Tech Lash W 4D", "Tech Lash YY", "Tech Lash W 5D", "Tech Lash Coffee", "Curva U"];
+                if (option >= 1 && option <= 6) selectedService = options[option - 1];
+            } else if (category === 'EFECTOS') {
+                const options = ["Wispy Look", "Kim-K Look", "Comics Look", "Foxy Tech"];
+                if (option >= 1 && option <= 4) selectedService = options[option - 1];
+            }
+
+            if (selectedService) {
+                sessions[from].service = selectedService;
                 await startChoosingSlot(msg, from, sessions[from].tempDate);
             } else {
-                await humanReply(msg, getRandomMsg([
-                    'Por favor elige un numerito del 1 al 7 hermosa 🌸',
-                    'Uy nena, ese numerito no es. Envíame sólo el número entre el 1 y el 7 ✨',
-                    'Princesa, elige con el número de la lista (1 para ver catálogo) 💖',
-                    'Linda, ese no lo encuentro. Escribe un número válido (1-7) 🌷',
-                    'Hermosa, márcame con el número del 1 al 7 qué te quieres hacer 🎀'
-                ]));
+                await humanReply(msg, "Esa opción no es válida nena, por favor elige un número de la lista que te mandé arribita 🌸");
             }
         }
         else if (state === 'CHOOSING_SLOT') {
