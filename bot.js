@@ -14,10 +14,14 @@ require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const STORAGE_PATH = process.env.STORAGE_PATH || (fs.existsSync('/data') ? '/data' : __dirname);
+const VOUCHER_DIR = path.join(__dirname, 'public', 'vouchers');
 
 // Ensure storage directory exists
 if (!fs.existsSync(STORAGE_PATH)) {
     fs.mkdirSync(STORAGE_PATH, { recursive: true });
+}
+if (!fs.existsSync(VOUCHER_DIR)) {
+    fs.mkdirSync(VOUCHER_DIR, { recursive: true });
 }
 const { execSync } = require('child_process');
 
@@ -340,7 +344,6 @@ client.on('message', async (msg) => {
                     `¡Anotado nena! ¿Deseas agendar:\n\n1. Montura Primera Vez\n2. Un Retoque del servicio?`,
                     `¡Listo princesa! Ayúdame con esto porfi:\n\n1. Voy por primera vez\n2. Ya tengo el servicio y vengo a retoque`
                 ]));
-            } else {
             } else {
                 sessions[from].state = 'CHOOSING_DATE_INIT';
                 await humanReply(msg, getRandomMsg([
