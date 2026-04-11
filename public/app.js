@@ -107,7 +107,9 @@ function initCalendar() {
                 const response = await fetch(`/api/schedule?start=${info.startStr}&end=${info.endStr}`);
                 const schedule = await response.json();
                 
-                if (calendar && calendar.view && calendar.view.type === 'dayGridMonth') {
+                const currentView = calendar.view.type;
+
+                if (currentView === 'dayGridMonth') {
                     const counts = {};
                     schedule.forEach(item => {
                         if (item.is_occupied !== 0) {
@@ -126,6 +128,41 @@ function initCalendar() {
                         className: 'summary-event'
                     }));
                     successCallback(events);
+                } else if (currentView === 'listDay') {
+                    // Generate full list for the day including Libre slots
+                    const workingHours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+                    const date = info.startStr.split('T')[0];
+                    const eventsMap = {};
+                    schedule.forEach(item => { eventsMap[item.time] = item; });
+
+                    const listEvents = workingHours.map(hour => {
+                        const item = eventsMap[hour];
+                        const start = `${date}T${hour}:00`;
+                        const endHour = String(parseInt(hour.split(':')[0], 10) + 1).padStart(2, '0');
+                        const end = `${date}T${endHour}:00:00`;
+
+                        if (!item || item.is_occupied === 0) {
+                            return {
+                                title: '✨ Libre / Disponible',
+                                start,
+                                end,
+                                backgroundColor: '#E8F5E9',
+                                textColor: '#2E7D32',
+                                className: 'status-libre',
+                                extendedProps: { status: 0, time: hour, date: date }
+                            };
+                        } else {
+                            return {
+                                title: item.is_occupied === 2 ? '🛡️ Bloqueado' : `👤 ${item.name || 'Cita'} (${item.phone || '-'})`,
+                                start,
+                                end,
+                                backgroundColor: item.is_occupied === 2 ? '#FFD1DC' : '#FF66B2',
+                                textColor: item.is_occupied === 2 ? '#333' : '#fff',
+                                extendedProps: { status: item.is_occupied, phone: item.phone, service: item.service, voucher_url: item.voucher_url }
+                            };
+                        }
+                    });
+                    successCallback(listEvents);
                 } else {
                     const events = schedule
                         .filter(item => item.is_occupied !== 0)
@@ -140,7 +177,7 @@ function initCalendar() {
                                 end,
                                 backgroundColor: item.is_occupied === 2 ? '#FFD1DC' : '#FF66B2',
                                 textColor: item.is_occupied === 2 ? '#333' : '#fff',
-                                extendedProps: { status: item.is_occupied, phone: item.phone, service: item.service }
+                                extendedProps: { status: item.is_occupied, phone: item.phone, service: item.service, voucher_url: item.voucher_url }
                             };
                         });
                     successCallback(events);

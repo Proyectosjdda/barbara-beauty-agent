@@ -467,6 +467,21 @@ body {
 .fc-list-event td:first-child { border-left: 1px solid #FFE4E1 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
 .fc-list-event td:last-child { border-right: 1px solid #FFE4E1 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 
+/* Status: Libre */
+.status-libre {
+    background: #F0FFF4 !important; /* Very light green */
+}
+.status-libre .fc-list-event-dot {
+    border-color: #48BB78 !important; /* Green dot */
+}
+.status-libre .fc-list-event-time {
+    color: #2F855A !important;
+}
+.status-libre .fc-list-event-title {
+    color: #2F855A !important;
+    font-style: italic;
+}
+
 @media screen and (max-width: 900px) {
   body { overflow-y: auto; height: auto; }
   .app-container { flex-direction: column; height: auto; min-height: 100vh; }
