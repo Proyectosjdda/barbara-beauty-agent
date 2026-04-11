@@ -64,27 +64,15 @@ body {
 }
 
 .logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
+  text-align: center;
   margin-bottom: 40px;
 }
 
-.logo .brand-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
-  text-align: center;
-  letter-spacing: 1.5px;
-  background: linear-gradient(45deg, #FF3399, #FF99CC);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0px 2px 4px rgba(255, 102, 178, 0.4));
-  line-height: 1.1;
-  text-transform: uppercase;
+.brand-logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -448,17 +436,15 @@ body {
   .chat-container { height: 70vh; }
 }
 
- . s u m m a r y - e v e n t   { 
-         t e x t - a l i g n :   c e n t e r ; 
-         f o n t - w e i g h t :   8 0 0 ; 
-         f o n t - s i z e :   1 4 p x ; 
-         l e t t e r - s p a c i n g :   0 . 5 p x ; 
-         p a d d i n g :   8 p x   0 ; 
-         t e x t - t r a n s f o r m :   u p p e r c a s e ; 
- } 
- . s u m m a r y - e v e n t : h o v e r   { 
-         b a c k g r o u n d :   t r a n s p a r e n t   ! i m p o r t a n t ; 
-         t r a n s f o r m :   s c a l e ( 1 . 0 5 ) ; 
- } 
-  
- 
+ . s u m m a r e - e v e n t   { 
+          t e x t - a l i g n :   c e n t e r ; 
+          f o n t - w e i g h t :   8 0 0 ; 
+          f o n t - s i z e :   1 4 p x ; 
+          l e t t e r - s p a c i n g :   0 . 5 p x ; 
+          p a d d i n g :   8 p x   0 ; 
+          t e x t - t r a n s f o r m :   u p p e r c a s e ; 
+  } 
+  . s u m m a r e - e v e n t : h o v e r   { 
+          b a c k g r o u n d :   t r a n s p a r e n t   ! i m p o r t a n t ; 
+          t r a n s f o r m :   s c a l e ( 1 . 0 5 ) ; 
+  } 
