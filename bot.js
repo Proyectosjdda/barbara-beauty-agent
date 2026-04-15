@@ -319,6 +319,21 @@ client.on('message', async (msg) => {
                     ]));
                     return;
                 }
+
+                // ✅ Cutoff: no same-day bookings after 6 PM
+                const isToday = parsedMoment.isSame(moment(), 'day');
+                const currentHour = moment().hour();
+                if (isToday && currentHour >= 18) {
+                    await humanReply(msg, getRandomMsg([
+                        "Ay hermosa, ya cerramos la agenda para hoy 🌸. ¿Te agendo mejor para mañana o cualquier otro día?",
+                        "Nena, después de las 6 PM ya no podemos recibir citas para el mismo día 💖. ¿Para qué otro día te busco espacio?",
+                        "Princesa, la agenda del día de hoy ya está cerrada ✨. Dime para qué día te gustaría y con gusto te agendo.",
+                        "Linda, ya pasó el horario de atención de hoy 🌷. Pero mañana arrancamos desde las 8 AM, ¿te sirve?",
+                        "Reina, no puedo agendarte para hoy tan tarde 🎀. ¿Para mañana o cuándo te queda mejor?"
+                    ]));
+                    return;
+                }
+
                 
                 const formattedDate = parsedMoment.format('DD/MM/YYYY');
                 const dayName = parsedMoment.locale('es').format('dddd');
