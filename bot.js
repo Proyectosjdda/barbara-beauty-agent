@@ -142,7 +142,7 @@ const SERVICE_DURATIONS = {
     'Curva U':          120,
     'Luxe Lift Brows':   60,   // Laminado – 1h
     'Soft Brows':        60,   // Diseño + depilación + pigm. – 1h
-    'Clean Shape':       30,   // Solo diseño/depilación – 30min
+    'Clean Shape':       60,   // Diseño/depilación – 1h (bloque cerrado)
     'Wispy Look':       150,   // Efectos especiales – 2h 30min
     'Kim-K Look':       150,
     'Comics Look':      150,
@@ -553,12 +553,13 @@ client.on('message', async (msg) => {
             } else if (isNo(body)) {
                 // Proceed with original flow
                 if (sessions[from].flowType === 'PRIMERA_VEZ') {
-                    const primaryService = sessions[from].services[0];
-                    const price = SERVICE_PRICES[primaryService] || 0;
-                    const deposit = Math.round(price * 0.4);
-                    const depositText = price > 0
-                        ? `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ($${deposit.toLocaleString()}) ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`
-                        : `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
+                    // ✅ Sum price of ALL selected services for the 40% deposit
+                    const totalPrice = (sessions[from].services || []).reduce((sum, svc) => sum + (SERVICE_PRICES[svc] || 0), 0);
+                    const deposit = Math.round(totalPrice * 0.4);
+                    const servicesList = sessions[from].service;
+                    const depositText = totalPrice > 0
+                        ? `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS (${servicesList}) = $${deposit.toLocaleString()} ANTES DE LA CITA PARA PODER AGENDARTE!*`
+                        : `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
                     sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
                     await humanReply(msg, `¡Excelente elección nena! 💖 Para asegurar tu primera cita, tenemos esta política de reserva:\n\n${depositText}\n\n*ESTAS SON LAS OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes 7 minutos para enviarlo antes de que se cierre el turno)`);
                 } else {
