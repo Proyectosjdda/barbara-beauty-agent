@@ -609,11 +609,12 @@ async function startChoosingSlot(msg, from, date) {
 }
 
 function startReminderCron() {
-    console.log('[Cron] Reminder cron job started. Checking every 15 minutes (Mon–Sat, 6AM–10PM).');
-    // ✅ COST OPTIMIZATION: Only fire during actual working hours Mon-Sat, 6AM-10PM
-    // Old schedule '*/15 * * * *' fired 96x/day (24/7) even when returning early
-    // New schedule fires ~52x/day only when reminders could actually be needed
-    cron.schedule('5,20,35,50 6-21 * * 1-6', async () => {
+    console.log('[Cron] Reminder cron job started. Checking every 15 minutes (Mon–Sat, 7AM–5PM).');
+    // ✅ COST OPTIMIZATION: Cron fires only during reminder-relevant hours:
+    // - Wakes at 7:00 AM to catch the 8:00 AM appointment (first slot)
+    // - Last reminder needed at 5PM for the 6PM appointment (last slot)
+    // - Dormant every night and all day Sunday → minimum Railway compute cost
+    cron.schedule('5,20,35,50 7-17 * * 1-6', async () => {
         const now = moment();
 
         console.log('[Cron] Running reminder check...');
