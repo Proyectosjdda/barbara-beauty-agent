@@ -57,10 +57,39 @@ async function parseDate(message, referenceDate = new Date().toISOString().split
     // 1. Manual Fallback for common cases
     const ref = () => moment(referenceDate, 'YYYY-MM-DD').locale('es');
     
-    if (msg.includes('pasado mañana') || msg.includes('pasado mañana')) return ref().add(2, 'day').format('YYYY-MM-DD');
+    if (msg.includes('pasado mañana') || msg.includes('pasado manana')) return ref().add(2, 'day').format('YYYY-MM-DD');
     if (msg.includes('mañana')) return ref().add(1, 'day').format('YYYY-MM-DD');
     if (msg.includes('hoy')) return ref().format('YYYY-MM-DD');
-    
+
+    // ✅ "en X días" / "en X semanas" → e.g. "en 10 días", "en 2 semanas"
+    const enDiasMatch = msg.match(/en\s+(\d+)\s+d[íi]as?/);
+    if (enDiasMatch) {
+        return ref().add(parseInt(enDiasMatch[1]), 'days').format('YYYY-MM-DD');
+    }
+    const enSemanasMatch = msg.match(/en\s+(\d+)\s+semanas?/);
+    if (enSemanasMatch) {
+        return ref().add(parseInt(enSemanasMatch[1]), 'weeks').format('YYYY-MM-DD');
+    }
+
+    // ✅ "24 de abril", "5 de enero", etc. → specific calendar date
+    const monthMap = {
+        'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4,
+        'mayo': 5, 'junio': 6, 'julio': 7, 'agosto': 8,
+        'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
+    };
+    const specificDateMatch = msg.match(/(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/);
+    if (specificDateMatch) {
+        const day = parseInt(specificDateMatch[1]);
+        const month = monthMap[specificDateMatch[2]];
+        const refMoment = ref();
+        let targetDate = moment(`${refMoment.year()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'YYYY-MM-DD');
+        // If the date has already passed this year, roll to next year
+        if (targetDate.isBefore(refMoment, 'day')) {
+            targetDate = targetDate.add(1, 'year');
+        }
+        return targetDate.format('YYYY-MM-DD');
+    }
+
     const dayMap = {
         'lunes': 1, 'martes': 2, 'miércoles': 3, 'miercoles': 3,
         'jueves': 4, 'viernes': 5, 'sábado': 6, 'sabado': 6, 'domingo': 7
