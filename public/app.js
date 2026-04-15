@@ -95,8 +95,8 @@ function initCalendar() {
         height: 'auto',
         nowIndicator: true,
         locale: 'es',
-        slotMinTime: '07:00:00',
-        slotMaxTime: '20:00:00',
+        slotMinTime: '08:00:00',
+        slotMaxTime: '19:00:00',
         slotDuration: '01:00:00',
         allDaySlot: false,
         slotLabelFormat: { hour: 'numeric', minute: '2-digit', hour12: true },
@@ -130,7 +130,7 @@ function initCalendar() {
                     successCallback(events);
                 } else if (currentView === 'listDay') {
                     // Generate full list for the day including Libre slots
-                    const workingHours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+                    const workingHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
                     const date = info.startStr.split('T')[0];
                     const eventsMap = {};
                     schedule.forEach(item => { eventsMap[item.time] = item; });
