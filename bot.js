@@ -591,6 +591,27 @@ client.on('message', async (msg) => {
                         `¡Todo confirmado linda! 🌷 Quedó para el *${dateStr}* a las *${timeStr}* para que te hagas *${context.service}*. Aquí te esperamos ansiosas ✨.`,
                         `¡Agendada exitosamente reina! 🎀 Tu servicio será *${context.service}* y nos veremos el *${dateStr}* a las *${timeStr}*. ¡Un abrazo! 🌸`
                     ]));
+
+                    // ✅ Send policies as a follow-up after confirmation
+                    await humanReply(msg,
+`📋 *Políticas de Retoque y Retiro*
+
+*1. Política de retoque:*
+• Tiempo límite: Los retoques se realizan únicamente entre los 15 y 18 días. Después de ese tiempo deberá hacerse un retiro y nueva montura.
+• Un retoque requiere conservar al menos el 50% de las extensiones. Si traes menos, se evalúa como aplicación nueva.
+• Higiene: Es obligatorio asistir con las pestañas limpias (sin rímel, polvo, residuos de maquillaje o suciedad acumulada).
+• Trabajos de terceros: No realizo retoques sobre trabajos de otros salones. Deberá hacerse un retiro y aplicación nueva.
+
+*2. Políticas de retiro:*
+• Nunca arranques las extensiones en casa. El retiro se realiza con productos que disuelven el adhesivo sin dañar tus pestañas naturales.
+• Set aplicado por mí + nueva montura: *$10.000*
+• Retiro de otro lugar + nueva aplicación: *$15.000*
+• Solo retiro: *$20.000*
+
+*3. Garantía y cancelaciones:*
+• Garantía de *48 horas*: si notas caída excesiva en los primeros dos días (sin haberlas frotado), el ajuste es gratuito.
+• Inasistencia: Para cancelar o cambiar el día/hora avisa con al menos *24 horas* de anticipación. Las cancelaciones de último minuto podrían requerir un depósito previo a la siguiente cita. 🌸`
+                    );
                     delete sessions[from];
                 } else {
                     await humanReply(msg, getRandomMsg([
