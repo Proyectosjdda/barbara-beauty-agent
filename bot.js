@@ -609,21 +609,12 @@ async function startChoosingSlot(msg, from, date) {
 }
 
 function startReminderCron() {
-    console.log('[Cron] Reminder cron job started. Checking every 15 minutes.');
-    // Run every 15 minutes to save ticks
-    cron.schedule('*/15 * * * *', async () => {
+    console.log('[Cron] Reminder cron job started. Checking every 15 minutes (Mon–Sat, 6AM–10PM).');
+    // ✅ COST OPTIMIZATION: Only fire during actual working hours Mon-Sat, 6AM-10PM
+    // Old schedule '*/15 * * * *' fired 96x/day (24/7) even when returning early
+    // New schedule fires ~52x/day only when reminders could actually be needed
+    cron.schedule('5,20,35,50 6-21 * * 1-6', async () => {
         const now = moment();
-        const currentHour = now.hour();
-        const currentDay = now.day();
-
-        // No evaluar recordatorios los domingos
-        if (currentDay === 0) return;
-
-        // Apagar completamente las validaciones desde las 10:00 PM hasta las 5:59 AM.
-        // A las 6:00 AM despertará y atrapará perfectamente la cita de las 7:00 AM.
-        if (currentHour >= 22 || currentHour < 6) {
-            return;
-        }
 
         console.log('[Cron] Running reminder check...');
         try {
