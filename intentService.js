@@ -14,15 +14,16 @@ async function detectActionIntent(message) {
     const cancelPhrases = ['no voy a poder', 'cancela', 'anular', 'hoy no puedo ir', 'debo cancelar', 'no puedo ir', 'cancelar'];
     const bookPhrases = ['agendar', 'cita', 'citas', 'disponibilidad', 'espacio', 'turno', 'reservar', 'apartar', 'agendame', 'me puedes agendar'];
     
-    // Check manual cancel phrases first
+    // ✅ Fast-path: check obvious phrases first (no Gemini call needed)
     if (cancelPhrases.some(p => msg.includes(p))) return { action: 'CANCEL' };
-    
-    // If no gemini API, fallback strictly to bookPhrases
+    if (bookPhrases.some(p => msg.includes(p))) return { action: 'BOOK' };
+
+    // If no gemini API, stop here
     if (!process.env.GEMINI_API_KEY) {
-        if (bookPhrases.some(k => msg.includes(k))) return { action: 'BOOK' };
         return { action: 'NONE' };
     }
 
+    // Only call Gemini for ambiguous messages that don't match any keyword
     const prompt = `Analiza si el siguiente mensaje de un usuario de WhatsApp a "Barbara Beauty" indica una intención CLARA de agendar (BOOK) o cancelar (CANCEL).
     
     REGLA MUY ESTRICTA: Este es el número personal de Bárbara. El bot NO debe activarse con saludos casuales ("hola", "como vas") ni con agradecimientos ("me encantó el retoque", "qué lindas pestañas"). 
