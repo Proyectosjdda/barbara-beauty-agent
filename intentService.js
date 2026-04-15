@@ -61,23 +61,30 @@ async function parseDate(message, referenceDate = new Date().toISOString().split
     if (msg.includes('mañana')) return ref().add(1, 'day').format('YYYY-MM-DD');
     if (msg.includes('hoy')) return ref().format('YYYY-MM-DD');
 
-    // ✅ "en X días" / "en X semanas" → e.g. "en 10 días", "en 2 semanas"
-    const enDiasMatch = msg.match(/en\s+(\d+)\s+d[íi]as?/);
+    // ✅ "X días" / "en X días" → e.g. "10 días", "en 10 días", "en 3 dias"
+    const enDiasMatch = msg.match(/(?:en\s+)?(\d+)\s+d[íi]as?/);
     if (enDiasMatch) {
         return ref().add(parseInt(enDiasMatch[1]), 'days').format('YYYY-MM-DD');
     }
-    const enSemanasMatch = msg.match(/en\s+(\d+)\s+semanas?/);
+
+    // ✅ "X semanas" / "en X semanas" → e.g. "2 semanas", "en 3 semanas"
+    const enSemanasMatch = msg.match(/(?:en\s+)?(\d+)\s+semanas?/);
     if (enSemanasMatch) {
         return ref().add(parseInt(enSemanasMatch[1]), 'weeks').format('YYYY-MM-DD');
     }
 
-    // ✅ "24 de abril", "5 de enero", etc. → specific calendar date
+    // ✅ "un mes" / "en un mes" → 1 month from today
+    if (msg.includes('un mes') || msg.includes('1 mes')) {
+        return ref().add(1, 'month').format('YYYY-MM-DD');
+    }
+
+    // ✅ "el 5 de abril" / "5 de abril" / "el 24 de enero" / "24 de enero"
     const monthMap = {
         'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4,
         'mayo': 5, 'junio': 6, 'julio': 7, 'agosto': 8,
         'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
     };
-    const specificDateMatch = msg.match(/(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/);
+    const specificDateMatch = msg.match(/(?:el\s+)?(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/);
     if (specificDateMatch) {
         const day = parseInt(specificDateMatch[1]);
         const month = monthMap[specificDateMatch[2]];
