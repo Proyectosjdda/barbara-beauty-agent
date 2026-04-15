@@ -193,7 +193,7 @@ client.on('message', async (msg) => {
             }
         } 
         else if (state === 'GETTING_CANCEL_PHONE') {
-            const phone = body.replace(/\\D/g, '');
+            const phone = body.replace(/\D/g, '');
             const upcomingList = await getUpcomingAppointmentsByWhatsApp(phone);
             
             if (upcomingList && upcomingList.length > 0) {
@@ -378,8 +378,19 @@ client.on('message', async (msg) => {
                 try {
                     const catalogPath = path.join(__dirname, 'public', 'catalogo.pdf');
                     if (fs.existsSync(catalogPath)) {
+                        // ✅ ANTI-BAN: Read pause before sending file
+                        const chat = await msg.getChat();
+                        await chat.sendSeen();
+                        await randomDelay(1500, 3500);
+                        await chat.sendStateTyping();
+                        await randomDelay(2000, 4000);
+                        await chat.clearState();
+
                         const media = MessageMedia.fromFilePath(catalogPath);
                         await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios hermosa ✨' });
+
+                        // ✅ ANTI-BAN: Pause between PDF and the follow-up text message
+                        await randomDelay(3000, 6000);
                         await humanReply(msg, `¿Y bien nena? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
                     } else {
                         await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento.");
@@ -503,7 +514,7 @@ client.on('message', async (msg) => {
             ]));
         }
         else if (state === 'GETTING_PHONE') {
-            const rawPhone = body.replace(/\\D/g, ''); 
+            const rawPhone = body.replace(/\D/g, '');
             if (rawPhone.length < 7) {
                 await humanReply(msg, getRandomMsg([
                     'Ese número parece faltarle dígitos nena, revísalo y escríbelo de nuevo porfa 🌸:',
@@ -640,6 +651,9 @@ function startReminderCron() {
                 await client.sendMessage(whatsappId, message);
                 // Mark as sent so we don't send it again
                 await markReminderSent(rem.id);
+                // ✅ ANTI-BAN: Random delay between each reminder (4–10 seconds)
+                // Prevents sending multiple reminders back-to-back which looks like bulk spam
+                await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 6000) + 4000));
             }
         } catch (err) {
             console.error('[Cron] Error in reminder cron:', err);
