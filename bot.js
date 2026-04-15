@@ -147,8 +147,14 @@ async function humanReply(msg, text) {
 }
 
 client.on('message', async (msg) => {
+    // Guard: skip null/empty messages (stickers, reactions, etc.) and own messages
+    if (!msg.body || msg.fromMe) return;
+
     const from = msg.from;
     const body = msg.body.trim();
+
+    // Guard: skip if body is empty after trim
+    if (!body) return;
     
     // Update or clear session if needed
     if (sessions[from]) {
