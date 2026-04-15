@@ -63,6 +63,30 @@ function formatTime12h(time24h) {
     return moment(time24h, 'HH:mm').format('hh:mm A');
 }
 
+// ✅ UX: Accept 'sí/si/no' as well as '1'/'2' in all Yes/No dialogs
+function isYes(text) {
+    const t = text.toLowerCase().trim();
+    return t === '1' || t === 'si' || t === 'sí' || t === 'yes' ||
+           t === 'dale' || t === 'claro' || t === 'ok' || t === 'bueno' || t === 'obvio' || t === 'perfecto';
+}
+function isNo(text) {
+    const t = text.toLowerCase().trim();
+    return t === '2' || t === 'no' || t === 'nop' || t === 'nope' || t === 'nel' || t === 'para nada';
+}
+
+// ✅ Filter slots so only start times with enough consecutive hours are shown
+function getValidStartSlots(availableSlots, durationMinutes) {
+    const slotsNeeded = Math.ceil(durationMinutes / 60);
+    if (slotsNeeded <= 1) return availableSlots;
+    return availableSlots.filter(slot => {
+        for (let i = 1; i < slotsNeeded; i++) {
+            const required = moment(slot, 'HH:mm').add(i, 'hours').format('HH:mm');
+            if (!availableSlots.includes(required)) return false;
+        }
+        return true;
+    });
+}
+
 // Session cleanup loop
 setInterval(() => {
     const now = Date.now();
@@ -82,7 +106,7 @@ setInterval(() => {
     }
 }, 30000); // Check every 30 seconds
 
-// Price mapping for 40% deposit (Placeholders for missing values)
+// Price mapping for 40% deposit
 const SERVICE_PRICES = {
     "Soft Brows": 40000,
     "Luxe Lift Brows": 90000,
@@ -92,7 +116,6 @@ const SERVICE_PRICES = {
     "Kim-K Look": 170000,
     "Comics Look": 170000,
     "Foxy Tech": 145000,
-    // Default prices for services without specified values
     "Classic Glow": 120000,
     "Deep Black Lash": 130000,
     "Glam Lash": 150000,
@@ -102,7 +125,28 @@ const SERVICE_PRICES = {
     "Tech Lash W 5D": 150000,
     "Tech Lash Coffee": 150000,
     "Curva U": 160000,
-    "Retoque": 0 
+    "Retoque": 0
+};
+
+// ✅ Duration per service (in minutes)
+const SERVICE_DURATIONS = {
+    'Lash Bloom':        60,   // Lifting – 1h
+    'Classic Glow':     120,   // Extensiones – 2h
+    'Deep Black Lash':  120,
+    'Glam Lash':        120,
+    'Tech Lash W 3D':   120,   // Pestañas Tecnológicas – 2h
+    'Tech Lash W 4D':   120,
+    'Tech Lash YY':     120,
+    'Tech Lash W 5D':   120,
+    'Tech Lash Coffee': 120,
+    'Curva U':          120,
+    'Luxe Lift Brows':   60,   // Laminado – 1h
+    'Soft Brows':        60,   // Diseño + depilación + pigm. – 1h
+    'Clean Shape':       30,   // Solo diseño/depilación – 30min
+    'Wispy Look':       150,   // Efectos especiales – 2h 30min
+    'Kim-K Look':       150,
+    'Comics Look':      150,
+    'Foxy Tech':        150,
 };
 
 client.on('qr', (qr) => {
@@ -375,8 +419,7 @@ client.on('message', async (msg) => {
             }
         }
         else if (state === 'CONFIRMING_DATE') {
-            const cleanBody = body.toLowerCase().trim();
-            if (cleanBody === '1' || cleanBody.includes('si')) {
+            if (isYes(body)) {
                 sessions[from].state = 'CHOOSING_FLOW_TYPE';
                 await humanReply(msg, getRandomMsg([
                     `¡Perfecto hermosa! Antes de ver los servicios, cuéntame:\n\n1. Es mi Montura por Primera Vez ✨\n2. Es un Retoque 🌸`,
@@ -478,21 +521,51 @@ client.on('message', async (msg) => {
             }
 
             if (selectedService) {
-                sessions[from].service = selectedService;
-                
+                // ✅ Track multiple services and cumulative duration
+                if (!sessions[from].services) sessions[from].services = [];
+                if (!sessions[from].totalDuration) sessions[from].totalDuration = 0;
+                sessions[from].services.push(selectedService);
+                sessions[from].totalDuration += (SERVICE_DURATIONS[selectedService] || 60);
+                sessions[from].service = sessions[from].services.join(' + ');
+
+                // Ask if they want to add another service
+                sessions[from].state = 'ADDING_MORE_SERVICES';
+                const totalMin = sessions[from].totalDuration;
+                const durText = totalMin >= 60
+                    ? `${Math.floor(totalMin/60)}h${totalMin%60 > 0 ? ` ${totalMin%60}min` : ''}`
+                    : `${totalMin}min`;
+                await humanReply(msg, getRandomMsg([
+                    `¡Excelente elección hermosa! 💖 Tienes *${sessions[from].service}* (${durText} en total). ¿Deseas agendar otro servicio para el mismo día?\n\n1. Sí, agregar otro servicio 💅\n2. No, con ese está perfecto ✨`,
+                    `¡Qué buen gusto nena! Elegiste *${sessions[from].service}* (${durText}). ¿Quieres combinar con otro servicio?\n\n1. Sí, agrego otro\n2. No, eso es todo`,
+                    `¡Anotado princesa! *${sessions[from].service}* (${durText}). ¿Agregas algo más para ese día?\n\n1. Sí\n2. No, perfecto así`
+                ]));
+            } else {
+                await humanReply(msg, "Esa opción no es válida nena, por favor elige un número de la lista que te mandé arribita 🌸");
+            }
+        }
+        else if (state === 'ADDING_MORE_SERVICES') {
+            if (isYes(body)) {
+                // Back to service selection, keeping accumulated services
+                sessions[from].state = 'CHOOSING_SERVICE';
+                const isRetoque = sessions[from].flowType === 'RETOQUE';
+                const sofar = sessions[from].services.join(' + ');
+                await humanReply(msg, `¡Perfecto! Ya tienes *${sofar}*. ¿Cuál otro agregas? 💖\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
+            } else if (isNo(body)) {
+                // Proceed with original flow
                 if (sessions[from].flowType === 'PRIMERA_VEZ') {
-                    const price = SERVICE_PRICES[selectedService] || 0;
+                    const primaryService = sessions[from].services[0];
+                    const price = SERVICE_PRICES[primaryService] || 0;
                     const deposit = Math.round(price * 0.4);
-                    const depositText = price > 0 ? `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ($${deposit.toLocaleString()}) ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*` : `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
-                    
+                    const depositText = price > 0
+                        ? `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ($${deposit.toLocaleString()}) ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`
+                        : `*SE DEBE CANCELAR EL 40% DEL VALOR DEL SERVICIO ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
                     sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
                     await humanReply(msg, `¡Excelente elección nena! 💖 Para asegurar tu primera cita, tenemos esta política de reserva:\n\n${depositText}\n\n*ESTAS SON LAS OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes 7 minutos para enviarlo antes de que se cierre el turno)`);
                 } else {
-                    // Retoque: direct to slots
                     await startChoosingSlot(msg, from, sessions[from].tempDate);
                 }
             } else {
-                await humanReply(msg, "Esa opción no es válida nena, por favor elige un número de la lista que te mandé arribita 🌸");
+                await humanReply(msg, 'Por favor responde *1* para agregar otro servicio, o *2* si ya terminaste hermosa 🌸');
             }
         }
         else if (state === 'WAITING_PAYMENT_VOUCHER') {
@@ -640,27 +713,38 @@ client.on('message', async (msg) => {
 });
 
 async function startChoosingSlot(msg, from, date) {
-    const slots = await getAvailableSlots(date);
-    
+    const allFreeSlots = await getAvailableSlots(date);
+    const duration = sessions[from].totalDuration || 60;
+    // ✅ Only show start times where enough consecutive hours are free
+    const slots = getValidStartSlots(allFreeSlots, duration);
+
+    const durH = Math.floor(duration / 60);
+    const durM = duration % 60;
+    const durText = durH > 0
+        ? (durM > 0 ? `${durH}h ${durM}min` : `${durH} hora${durH > 1 ? 's' : ''}`)
+        : `${durM} minutos`;
+
     if (slots.length === 0) {
         await humanReply(msg, getRandomMsg([
-            `Ay nena, ya no tengo espacios libres para el ${moment(date).format('DD/MM/YYYY')} 😔.`,
-            `Hermosa qué pena! Ya estoy súper llena el ${moment(date).format('DD/MM/YYYY')} ✨.`,
-            `Princesa, reviso y para el ${moment(date).format('DD/MM/YYYY')} estoy a tope hoy 💔.`,
-            `Linda, lastimosamente llené agenda para el ${moment(date).format('DD/MM/YYYY')}. ¡Pregúntame otro día! 🌸`,
-            `Reina, para el ${moment(date).format('DD/MM/YYYY')} ya cayeron todas las citas. ¿Miramos otro día? 🎀`
+            `Ay nena, ya no tengo espacios de *${durText}* disponibles el ${moment(date).format('DD/MM/YYYY')} 😔. ¿Miramos otro día?`,
+            `Hermosa, para tus servicios necesito *${durText}* seguidas y ya no hay ese espacio el ${moment(date).format('DD/MM/YYYY')} 💔. ¿Busco otro día?`,
+            `Princesa, revisé y no encuentro *${durText}* libres el ${moment(date).format('DD/MM/YYYY')} 😔. ¡Dime otro día!`,
+            `Linda lastimosamente no hay bloque de *${durText}* disponible el ${moment(date).format('DD/MM/YYYY')}. ¡Pregúntame otro día! 🌸`,
+            `Reina, mis servicios toman *${durText}* y ese día ya está muy lleno. ¿Miramos otro? 🎀`
         ]));
         delete sessions[from];
     } else {
+        const servicesText = sessions[from].services && sessions[from].services.length > 1
+            ? `tus servicios (*${sessions[from].service}*)`
+            : `tu servicio (*${sessions[from].service || ''}*)`;
         let response = getRandomMsg([
-            `Escoge una horita de las disponibles para el ${moment(date).format('DD/MM/YYYY')} hermosa:\n\n`,
-            `Mira los espacios bellos que tengo para el ${moment(date).format('DD/MM/YYYY')} nena:\n\n`,
-            `Estas son las horas en que te puedo consentir el ${moment(date).format('DD/MM/YYYY')} princesa:\n\n`,
-            `Aquí tienes los horitas del ${moment(date).format('DD/MM/YYYY')} linda, me avisas cuál cuadra:\n\n`,
-            `Elije con un número el campito que desees el ${moment(date).format('DD/MM/YYYY')} reina:\n\n`
+            `Para ${servicesText} necesito *${durText}*. Escoge el inicio que más te sirva:\n\n`,
+            `¡Aquí los espacios de *${durText}* disponibles! Elige el campito que prefieras:\n\n`,
+            `Mira los horarios libres para *${durText}* el ${moment(date).format('DD/MM/YYYY')}:\n\n`
         ]);
         slots.forEach((s, i) => {
-            response += `${i + 1}. ${formatTime12h(s)}\n`;
+            const endTime = moment(s, 'HH:mm').add(duration, 'minutes').format('hh:mm A');
+            response += `${i + 1}. ${formatTime12h(s)} – ${endTime}\n`;
         });
         sessions[from].state = 'CHOOSING_SLOT';
         sessions[from].slots = slots;
