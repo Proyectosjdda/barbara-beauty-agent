@@ -130,6 +130,18 @@ function randomDelay(minMs, maxMs) {
     return new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs));
 }
 
+// ✅ UX: Random hint to guide users to type the number
+function getNumberHint() {
+    const hints = [
+        '_✍️ Escoge un número y escríbelo aquí abajo_',
+        '_👆 Solo escribe el número de tu opción_',
+        '_📝 Escribe el número que prefieras_',
+        '_💬 Responde con el número de tu elección_',
+        '_☝️ Escoge una opción y escríbeme el número_'
+    ];
+    return hints[Math.floor(Math.random() * hints.length)];
+}
+
 async function humanReply(msg, text) {
     const chat = await msg.getChat();
     // Mark as seen first (shows blue ticks)
@@ -143,7 +155,13 @@ async function humanReply(msg, text) {
     await randomDelay(typingMs, typingMs);
     // Stop typing and send the message
     await chat.clearState();
-    await msg.reply(text);
+
+    // ✅ Auto-append number hint when message has numbered options (lines starting with "1.")
+    let finalText = text;
+    if (/\n\s*1[.\-]/.test(text)) {
+        finalText = text + '\n\n' + getNumberHint();
+    }
+    await msg.reply(finalText);
 }
 
 client.on('message', async (msg) => {
