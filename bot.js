@@ -607,20 +607,8 @@ client.on('message', async (msg) => {
                 const sofar = sessions[from].services.join(' + ');
                 await humanReply(msg, `¡Perfecto! Ya tienes *${sofar}*. ¿Cuál otro agregas? 💖\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
             } else if (isNo(body)) {
-                // Proceed with original flow
-                if (sessions[from].flowType === 'PRIMERA_VEZ') {
-                    // ✅ Sum price of ALL selected services for the 40% deposit
-                    const totalPrice = (sessions[from].services || []).reduce((sum, svc) => sum + (SERVICE_PRICES[svc] || 0), 0);
-                    const deposit = Math.round(totalPrice * 0.4);
-                    const servicesList = sessions[from].service;
-                    const depositText = totalPrice > 0
-                        ? `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS (${servicesList}) = $${deposit.toLocaleString()} ANTES DE LA CITA PARA PODER AGENDARTE!*`
-                        : `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
-                    sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
-                    await humanReply(msg, `¡Excelente elección nena! 💖 Para asegurar tu primera cita, tenemos esta política de reserva:\n\n${depositText}\n\n*ESTAS SON LAS OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes 7 minutos para enviarlo antes de que se cierre el turno)`);
-                } else {
-                    await startChoosingSlot(msg, from, sessions[from].tempDate);
-                }
+                // ✅ Both flows now show the slot first, payment (if PRIMERA_VEZ) comes AFTER slot is chosen
+                await startChoosingSlot(msg, from, sessions[from].tempDate);
             } else {
                 await humanReply(msg, 'Por favor responde *1* para agregar otro servicio, o *2* si ya terminaste hermosa 🌸');
             }
@@ -635,8 +623,16 @@ client.on('message', async (msg) => {
                         fs.writeFileSync(savePath, media.data, { encoding: 'base64' });
                         
                         sessions[from].voucherUrl = `/vouchers/${filename}`;
-                        await humanReply(msg, "¡Recibido hermosa! ✨ Gracias por enviar el comprobante. Ahora sí, vamos a elegir tu hora preferida:");
-                        await startChoosingSlot(msg, from, sessions[from].tempDate);
+                        await humanReply(msg, "¡Recibido hermosa! ✨ Gracias por enviar el comprobante. Ahora cuéntame:");
+                        // After payment, go to get name
+                        sessions[from].state = 'GETTING_NAME';
+                        await humanReply(msg, getRandomMsg([
+                            '¿A qué nombre agendamos la cita hermosa? ✨',
+                            'Regálame tu nombre completo para dejar el turno asegurado 🌸',
+                            '¿Cómo te llamas nena? Lo necesito para la agenda 💖',
+                            'Escríbeme tu nombre completo para poner el turno a tu nombre 🌷',
+                            '¿Tu nombre completo princesa? Así te pongo en el sistema 🎀'
+                        ]));
                     }
                 } catch (err) {
                     console.error("Error downloading voucher:", err);
@@ -660,15 +656,28 @@ client.on('message', async (msg) => {
                 ]));
             } else {
                 const selectedTime = slots[index];
-                sessions[from].state = 'GETTING_NAME';
                 sessions[from].time = selectedTime;
-                await humanReply(msg, getRandomMsg([
-                    '¡Súper! ¿A qué nombre agendamos la cita hermosa? ✨',
-                    '¡Genial! Regálame tu nombrecito y apellido para asegurar tu agenda nena 🌸',
-                    '¡Qué bien princesa! ¿Cómo te llamas para dejarlo guardadito? 💖',
-                    'Perfecto linda. Dime tu nombre completo para el sistema porfi 🌷',
-                    '¡Ya casi reina! Escríbeme tu nombre para ponerte en el calendario 🎀'
-                ]));
+
+                // ✅ If PRIMERA_VEZ, ask for payment NOW (after slot chosen), before getting name
+                if (sessions[from].flowType === 'PRIMERA_VEZ') {
+                    const totalPrice = (sessions[from].services || []).reduce((sum, svc) => sum + (SERVICE_PRICES[svc] || 0), 0);
+                    const deposit = Math.round(totalPrice * 0.4);
+                    const servicesList = sessions[from].service;
+                    const depositText = totalPrice > 0
+                        ? `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS (${servicesList}) = $${deposit.toLocaleString()} ANTES DE LA CITA PARA PODER AGENDARTE!*`
+                        : `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
+                    sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
+                    await humanReply(msg, `¡Perfecto hermosa! Separé tu hora ✨ Para confirmar tu primera cita, necesito el comprobante de pago:\n\n${depositText}\n\n*OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes *15 minutos* para enviarlo antes de que se libere el turno)`);
+                } else {
+                    sessions[from].state = 'GETTING_NAME';
+                    await humanReply(msg, getRandomMsg([
+                        '¡Súper! ¿A qué nombre agendamos la cita hermosa? ✨',
+                        '¡Genial! Regálame tu nombrecito y apellido para asegurar tu agenda nena 🌸',
+                        '¡Qué bien princesa! ¿Cómo te llamas para dejarlo guardadito? 💖',
+                        'Perfecto linda. Dime tu nombre completo para el sistema porfi 🌷',
+                        '¡Ya casi reina! Escríbeme tu nombre para ponerte en el calendario 🎀'
+                    ]));
+                }
             }
         } 
         else if (state === 'GETTING_NAME') {
@@ -709,7 +718,8 @@ client.on('message', async (msg) => {
             if (cleanBody === '1' || cleanBody.includes('si') || cleanBody.includes('súper bien') || cleanBody.includes('perfecto')) {
                 const context = sessions[from];
                 const phone = context.extractedPhone;
-                const result = await bookSlot(context.name, phone, context.tempDate, context.time, context.service, context.voucherUrl);
+                // ✅ Pass totalDuration so bookSlot blocks all needed consecutive slots
+                const result = await bookSlot(context.name, phone, context.tempDate, context.time, context.service, context.voucherUrl, context.totalDuration || 60);
 
                 if (result.success) {
                     const timeStr = formatTime12h(context.time);

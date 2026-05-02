@@ -119,8 +119,9 @@ function initCalendar() {
                     
                     const isMobile = window.innerWidth < 600;
                     const events = Object.keys(counts).map(date => ({
-                        title: isMobile ? `${counts[date]} ${counts[date] === 1 ? 'turno' : 'turnos'}` : `${counts[date]} turnos agendados`,
-                        start: date,
+                        title: isMobile ? `${counts[date]}t` : `${counts[date]} turnos`,
+                        start: `${date}T00:00:00`,
+                        end: `${date}T00:00:00`,
                         allDay: true,
                         backgroundColor: 'transparent',
                         borderColor: 'transparent',
@@ -257,7 +258,7 @@ function initCalendar() {
                     vBtn.innerHTML = '🖼️ Pago';
                     vBtn.onclick = (e) => {
                         e.stopPropagation();
-                        window.open(voucherUrl, '_blank');
+                        showVoucherModal(voucherUrl);
                     };
                     textContent.appendChild(vBtn);
                 }
@@ -497,4 +498,38 @@ function setupMonthPicker() {
         popup.style.top = (rect.bottom + window.scrollY + 10) + 'px';
         popup.style.display = popup.style.display === 'none' ? 'grid' : 'none';
     };
+}
+
+// ✅ Voucher Modal: shows payment image as an inline lightbox
+function showVoucherModal(voucherUrl) {
+    // Remove any existing modal
+    const existing = document.getElementById('voucher-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'voucher-modal';
+    overlay.className = 'voucher-modal-overlay';
+    overlay.onclick = () => overlay.remove();
+
+    const box = document.createElement('div');
+    box.className = 'voucher-modal-box';
+    box.onclick = e => e.stopPropagation();
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'voucher-modal-close';
+    closeBtn.innerHTML = '✕';
+    closeBtn.onclick = () => overlay.remove();
+
+    const img = document.createElement('img');
+    img.src = voucherUrl;
+    img.alt = 'Comprobante de pago';
+    img.className = 'voucher-modal-img';
+
+    box.appendChild(closeBtn);
+    box.appendChild(img);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add('visible'));
 }

@@ -74,27 +74,49 @@ function getAvailableSlots(date) {
     });
 }
 
-function bookSlot(name, phone, date, time, service, voucher_url = null) {
+function bookSlot(name, phone, date, time, service, voucher_url = null, durationMinutes = 60) {
     return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.get("SELECT is_occupied FROM availability WHERE date = ? AND time = ?", [date, time], (err, row) => {
-                if (err) return reject(err);
-                if (!row || row.is_occupied !== 0) {
-                    return resolve({ success: false, message: 'El horario ya no está disponible.' });
-                }
+        // Build list of all hour-slots this appointment will occupy
+        const slotsNeeded = Math.max(1, Math.ceil(durationMinutes / 60));
+        const startHour = parseInt(time.split(':')[0], 10);
+        const allSlots = [];
+        for (let i = 0; i < slotsNeeded; i++) {
+            allSlots.push(`${String(startHour + i).padStart(2, '0')}:00`);
+        }
 
-                db.run("BEGIN TRANSACTION");
-                db.run("UPDATE availability SET is_occupied = 1 WHERE date = ? AND time = ?", [date, time]);
-                db.run("INSERT INTO appointments (name, phone, date, time, service, voucher_url) VALUES (?, ?, ?, ?, ?, ?)", [name, phone, date, time, service, voucher_url]);
-                db.run("COMMIT", (err) => {
-                    if (err) {
-                        db.run("ROLLBACK");
-                        reject(err);
-                    } else {
-                        resolve({ success: true });
+        db.serialize(() => {
+            // Check ALL required slots are free
+            const placeholders = allSlots.map(() => '?').join(',');
+            db.all(
+                `SELECT time, is_occupied FROM availability WHERE date = ? AND time IN (${placeholders})`,
+                [date, ...allSlots],
+                (err, rows) => {
+                    if (err) return reject(err);
+                    const allFree = rows.length === slotsNeeded && rows.every(r => r.is_occupied === 0);
+                    if (!allFree) {
+                        return resolve({ success: false, message: 'El horario ya no está disponible.' });
                     }
-                });
-            });
+
+                    db.run("BEGIN TRANSACTION");
+                    // Block all slots in availability
+                    allSlots.forEach(slotTime => {
+                        db.run("UPDATE availability SET is_occupied = 1 WHERE date = ? AND time = ?", [date, slotTime]);
+                    });
+                    // Single appointment record at the START time
+                    db.run(
+                        "INSERT INTO appointments (name, phone, date, time, service, voucher_url) VALUES (?, ?, ?, ?, ?, ?)",
+                        [name, phone, date, time, service, voucher_url]
+                    );
+                    db.run("COMMIT", (err) => {
+                        if (err) {
+                            db.run("ROLLBACK");
+                            reject(err);
+                        } else {
+                            resolve({ success: true });
+                        }
+                    });
+                }
+            );
         });
     });
 }
