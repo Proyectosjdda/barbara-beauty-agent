@@ -114,7 +114,7 @@ setInterval(() => {
         if (sessions[from].state === 'CHOOSING_SERVICE') {
             timeout = 5 * 60 * 1000; // 5 minutes
         } else if (sessions[from].state === 'WAITING_PAYMENT_VOUCHER') {
-            timeout = 7 * 60 * 1000; // 7 minutes
+            timeout = 15 * 60 * 1000; // 15 minutes
         }
 
         if (now - sessions[from].lastInteraction > timeout) {
@@ -227,14 +227,15 @@ async function humanReply(msg, text) {
 }
 
 client.on('message', async (msg) => {
-    // Guard: skip null/empty messages (stickers, reactions, etc.) and own messages
-    if (!msg.body || msg.fromMe) return;
+    // Guard: skip own messages and truly empty messages (but allow media with no caption)
+    if (msg.fromMe) return;
+    if (!msg.body && !msg.hasMedia) return;
 
     const from = msg.from;
-    const body = msg.body.trim();
+    const body = (msg.body || '').trim();
 
-    // Guard: skip if body is empty after trim
-    if (!body) return;
+    // Guard: skip if body is empty AND there's no media
+    if (!body && !msg.hasMedia) return;
     
     // Update or clear session if needed
     if (sessions[from]) {
@@ -470,8 +471,18 @@ client.on('message', async (msg) => {
             }
         }
         else if (state === 'CHOOSING_SERVICE') {
-            const option = parseInt(body);
             const isRetoque = sessions[from].flowType === 'RETOQUE';
+            const bodyLower = body.toLowerCase().trim();
+            let option = parseInt(body);
+
+            // ✅ Allow typing the category name instead of the number
+            if (isNaN(option) || option < 1 || option > 5) {
+                if (/cej[ao]s?|brow/i.test(bodyLower))                           option = 2;
+                else if (/tecnol[oó]g|tech\s*lash|tecno/i.test(bodyLower))      option = 4;
+                else if (/exten|lifting|bloom|glam|classic|deep/i.test(bodyLower)) option = 3;
+                else if (/efecto|wispy|kim|comic|foxy/i.test(bodyLower))         option = 5;
+                else if (/cat[aá]logo|ver\s*cat|lista/i.test(bodyLower))         option = 1;
+            }
             
             if (option === 1) {
                 // User wants to see the catalog
@@ -520,9 +531,36 @@ client.on('message', async (msg) => {
             }
         }
         else if (state === 'CHOOSING_SUB_SERVICE') {
-            const option = parseInt(body);
             const category = sessions[from].category;
+            const bodyLower = body.toLowerCase().trim();
+            let option = parseInt(body);
             let selectedService = "";
+
+            // ✅ Allow typing the service name instead of the number
+            if (isNaN(option) || option < 1) {
+                if (category === 'CEJAS') {
+                    if (/soft/i.test(bodyLower))                    option = 1;
+                    else if (/luxe|laminado/i.test(bodyLower))      option = 2;
+                    else if (/clean|solo\s*dise|depila/i.test(bodyLower)) option = 3;
+                } else if (category === 'EXTENSIONES') {
+                    if (/bloom|lifting/i.test(bodyLower))            option = 1;
+                    else if (/classic|natural|glow/i.test(bodyLower)) option = 2;
+                    else if (/deep|black|pesta/i.test(bodyLower)) option = 3;
+                    else if (/glam|volumen\s*ruso/i.test(bodyLower)) option = 4;
+                } else if (category === 'TECNOLOGICAS') {
+                    if (/\b3d\b/i.test(bodyLower))                   option = 1;
+                    else if (/\b4d\b/i.test(bodyLower))              option = 2;
+                    else if (/\byy\b/i.test(bodyLower))              option = 3;
+                    else if (/\b5d\b/i.test(bodyLower))              option = 4;
+                    else if (/coffee/i.test(bodyLower))              option = 5;
+                    else if (/curva/i.test(bodyLower))               option = 6;
+                } else if (category === 'EFECTOS') {
+                    if (/wispy/i.test(bodyLower))                    option = 1;
+                    else if (/kim/i.test(bodyLower))                 option = 2;
+                    else if (/comic/i.test(bodyLower))               option = 3;
+                    else if (/foxy/i.test(bodyLower))                option = 4;
+                }
+            }
 
             if (category === 'CEJAS') {
                 const options = ["Soft Brows", "Luxe Lift Brows", "Clean Shape"];
