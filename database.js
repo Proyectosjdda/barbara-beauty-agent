@@ -51,6 +51,27 @@ function initDb() {
 
 const WORKING_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
+// ✅ Duration per service (in minutes) — used to calculate multi-slot bookings/cancellations
+const SERVICE_DURATIONS = {
+    'Lash Bloom':        60,
+    'Classic Glow':     120,
+    'Deep Black Lash':  120,
+    'Glam Lash':        120,
+    'Tech Lash W 3D':   120,
+    'Tech Lash W 4D':   120,
+    'Tech Lash YY':     120,
+    'Tech Lash W 5D':   120,
+    'Tech Lash Coffee': 120,
+    'Curva U':          120,
+    'Luxe Lift Brows':   60,
+    'Soft Brows':        60,
+    'Clean Shape':       60,
+    'Wispy Look':       150,
+    'Kim-K Look':       150,
+    'Comics Look':      150,
+    'Foxy Tech':        150,
+};
+
 async function ensureSlotsExist(date) {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
@@ -75,7 +96,7 @@ function getAvailableSlots(date) {
 }
 
 function bookSlot(name, phone, date, time, service, voucher_url = null, durationMinutes = 60) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         // Build list of all hour-slots this appointment will occupy
         const slotsNeeded = Math.max(1, Math.ceil(durationMinutes / 60));
         const startHour = parseInt(time.split(':')[0], 10);
@@ -83,6 +104,11 @@ function bookSlot(name, phone, date, time, service, voucher_url = null, duration
         for (let i = 0; i < slotsNeeded; i++) {
             allSlots.push(`${String(startHour + i).padStart(2, '0')}:00`);
         }
+
+        console.log(`[bookSlot] Booking ${slotsNeeded} slots: ${allSlots.join(', ')} for ${service} (${durationMinutes}min)`);
+
+        // ✅ FIX: Ensure all consecutive slots exist in the availability table FIRST
+        await ensureSlotsExist(date);
 
         db.serialize(() => {
             // Check ALL required slots are free
@@ -202,17 +228,41 @@ function markReminderSent(id) {
 
 function cancelAppointment(date, time) {
     return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.run("BEGIN TRANSACTION");
-            db.run("UPDATE availability SET is_occupied = 0 WHERE date = ? AND time = ?", [date, time]);
-            db.run("DELETE FROM appointments WHERE date = ? AND time = ?", [date, time]);
-            db.run("COMMIT", (err) => {
-                if (err) {
-                    db.run("ROLLBACK");
-                    reject(err);
-                } else {
-                    resolve({ success: true });
-                }
+        // First, look up the service to know how many slots to free
+        db.get("SELECT service FROM appointments WHERE date = ? AND time = ?", [date, time], (err, row) => {
+            if (err) return reject(err);
+
+            // Calculate how many consecutive slots this appointment occupies
+            let slotsToFree = 1;
+            if (row && row.service) {
+                // Handle combined services like "Wispy Look + Soft Brows"
+                const services = row.service.split(' + ');
+                const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
+                slotsToFree = Math.max(1, Math.ceil(totalDuration / 60));
+            }
+            const startHour = parseInt(time.split(':')[0], 10);
+            const allSlots = [];
+            for (let i = 0; i < slotsToFree; i++) {
+                allSlots.push(`${String(startHour + i).padStart(2, '0')}:00`);
+            }
+
+            console.log(`[cancelAppointment] Freeing ${slotsToFree} slots: ${allSlots.join(', ')}`);
+
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION");
+                // Free ALL consecutive slots
+                allSlots.forEach(slotTime => {
+                    db.run("UPDATE availability SET is_occupied = 0 WHERE date = ? AND time = ?", [date, slotTime]);
+                });
+                db.run("DELETE FROM appointments WHERE date = ? AND time = ?", [date, time]);
+                db.run("COMMIT", (err) => {
+                    if (err) {
+                        db.run("ROLLBACK");
+                        reject(err);
+                    } else {
+                        resolve({ success: true });
+                    }
+                });
             });
         });
     });
