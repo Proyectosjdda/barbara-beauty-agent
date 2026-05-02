@@ -42,9 +42,50 @@ function initDb() {
                 is_occupied INTEGER DEFAULT 0,
                 PRIMARY KEY (date, time)
             )`, (err) => {
-                if (err) reject(err);
-                else resolve();
+                if (err) return reject(err);
+                // ✅ MIGRATION: Fix existing multi-hour appointments that only blocked 1 slot
+                fixMultiSlotAppointments().then(resolve).catch(reject);
             });
+        });
+    });
+}
+
+// ✅ Startup migration: retroactively block missing consecutive slots for multi-hour appointments
+async function fixMultiSlotAppointments() {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT date, time, service FROM appointments WHERE status = 'CONFIRMED'", [], async (err, rows) => {
+            if (err) return reject(err);
+            let fixed = 0;
+            for (const row of rows) {
+                if (!row.service) continue;
+                // Calculate total duration (handles combined services like "Wispy Look + Soft Brows")
+                const services = row.service.split(' + ');
+                const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
+                const slotsNeeded = Math.max(1, Math.ceil(totalDuration / 60));
+                if (slotsNeeded <= 1) continue;
+
+                const startHour = parseInt(row.time.split(':')[0], 10);
+                await ensureSlotsExist(row.date);
+
+                for (let i = 1; i < slotsNeeded; i++) {
+                    const slotTime = `${String(startHour + i).padStart(2, '0')}:00`;
+                    await new Promise((res, rej) => {
+                        db.run(
+                            "UPDATE availability SET is_occupied = 1 WHERE date = ? AND time = ? AND is_occupied = 0",
+                            [row.date, slotTime],
+                            function(err) {
+                                if (err) return rej(err);
+                                if (this.changes > 0) fixed++;
+                                res();
+                            }
+                        );
+                    });
+                }
+            }
+            if (fixed > 0) {
+                console.log(`[Migration] Fixed ${fixed} missing multi-hour slots for existing appointments.`);
+            }
+            resolve();
         });
     });
 }
