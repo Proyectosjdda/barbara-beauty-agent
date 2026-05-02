@@ -35,6 +35,13 @@ try {
     console.log('No system Chrome found, falling back to Puppeteer default.');
 }
 
+// ✅ VOLUME FIX: Redirect Chromium userDataDir to /tmp (ephemeral) so it doesn't fill
+// the Railway persistent volume. Only .wwebjs_auth (session) stays in the volume.
+const CHROMIUM_TMP_DIR = process.env.CHROMIUM_TMP_DIR || '/tmp/chromium-data';
+if (!fs.existsSync(CHROMIUM_TMP_DIR)) {
+    fs.mkdirSync(CHROMIUM_TMP_DIR, { recursive: true });
+}
+
 const client = new Client({
     authStrategy: new LocalAuth({
         dataPath: path.join(STORAGE_PATH, '.wwebjs_auth')
@@ -42,6 +49,7 @@ const client = new Client({
     puppeteer: {
         headless: true,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || systemChromePath || undefined,
+        userDataDir: CHROMIUM_TMP_DIR,
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox', 
@@ -49,7 +57,12 @@ const client = new Client({
             '--disable-extensions',
             '--disable-gpu',
             '--no-first-run',
-            '--no-zygote'
+            '--no-zygote',
+            '--disable-background-networking',
+            '--disable-default-apps',
+            '--disable-sync',
+            '--metrics-recording-only',
+            '--no-default-browser-check'
         ]
     }
 });
