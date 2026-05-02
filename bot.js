@@ -474,17 +474,23 @@ client.on('message', async (msg) => {
             const isRetoque = sessions[from].flowType === 'RETOQUE';
             const bodyLower = body.toLowerCase().trim();
             let option = parseInt(body);
+            const hasExistingServices = sessions[from].services && sessions[from].services.length > 0;
 
             // ✅ Allow typing the category name instead of the number
             if (isNaN(option) || option < 1 || option > 5) {
-                if (/cej[ao]s?|brow/i.test(bodyLower))                           option = 2;
-                else if (/tecnol[oó]g|tech\s*lash|tecno/i.test(bodyLower))      option = 4;
+                if (/cej[ao]s?|brow/i.test(bodyLower))                             option = 2;
+                else if (/tecnol[oó]g|tech\s*lash|tecno/i.test(bodyLower))        option = 4;
                 else if (/exten|lifting|bloom|glam|classic|deep/i.test(bodyLower)) option = 3;
-                else if (/efecto|wispy|kim|comic|foxy/i.test(bodyLower))         option = 5;
-                else if (/cat[aá]logo|ver\s*cat|lista/i.test(bodyLower))         option = 1;
+                else if (/efecto|wispy|kim|comic|foxy/i.test(bodyLower))           option = 5;
+                else if (/cat[aá]logo|ver\s*cat|lista/i.test(bodyLower))           option = 1;
+                // ✅ Allow "no/listo/continuar" to skip adding more when services exist
+                else if (hasExistingServices && /^(no|nop|nel|listo|continuar|siguiente|ya|suficiente)/i.test(bodyLower)) option = 6;
             }
-            
-            if (option === 1) {
+
+            // ✅ Option 6: only valid when user already has at least one service
+            if (hasExistingServices && option === 6) {
+                await startChoosingSlot(msg, from, sessions[from].tempDate);
+            } else if (option === 1) {
                 // User wants to see the catalog
                 try {
                     const catalogPath = path.join(__dirname, 'public', 'catalogo.pdf');
@@ -502,7 +508,7 @@ client.on('message', async (msg) => {
 
                         // ✅ ANTI-BAN: Pause between PDF and the follow-up text message
                         await randomDelay(3000, 6000);
-                        await humanReply(msg, `¿Y bien nena? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
+                        await humanReply(msg, `¿Y bien nena? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀\n6. No deseo otro servicio, continuar ✅`);
                     } else {
                         await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento.");
                     }
@@ -603,9 +609,8 @@ client.on('message', async (msg) => {
             if (isYes(body)) {
                 // Back to service selection, keeping accumulated services
                 sessions[from].state = 'CHOOSING_SERVICE';
-                const isRetoque = sessions[from].flowType === 'RETOQUE';
                 const sofar = sessions[from].services.join(' + ');
-                await humanReply(msg, `¡Perfecto! Ya tienes *${sofar}*. ¿Cuál otro agregas? 💖\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀`);
+                await humanReply(msg, `¡Perfecto! Ya tienes *${sofar}*. ¿Cuál otro agregas? 💖\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀\n6. No deseo otro servicio, continuar ✅`);
             } else if (isNo(body)) {
                 // ✅ Both flows now show the slot first, payment (if PRIMERA_VEZ) comes AFTER slot is chosen
                 await startChoosingSlot(msg, from, sessions[from].tempDate);
