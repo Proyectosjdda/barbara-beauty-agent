@@ -141,7 +141,14 @@ function initCalendar() {
                     const workingHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
                     const date = info.startStr.split('T')[0];
                     const eventsMap = {};
-                    schedule.forEach(item => { eventsMap[item.time] = item; });
+                    const cancelledEvents = [];
+                    schedule.forEach(item => { 
+                        if (item.is_cancelled) {
+                            cancelledEvents.push(item);
+                        } else {
+                            eventsMap[item.time] = item; 
+                        }
+                    });
 
                     const listEvents = workingHours.map(hour => {
                         const item = eventsMap[hour];
@@ -170,6 +177,21 @@ function initCalendar() {
                             };
                         }
                     });
+
+                    cancelledEvents.forEach(item => {
+                        listEvents.push({
+                            title: `❌ Cancelado: ${item.name || 'Cita'} - Perdió Abono`,
+                            start: `${date}T00:00:00`,
+                            end: `${date}T00:00:00`,
+                            allDay: true,
+                            backgroundColor: '#ffebee',
+                            borderColor: '#ef5350',
+                            textColor: '#c62828',
+                            className: 'status-cancelled',
+                            extendedProps: { status: -1, phone: item.phone, service: item.service }
+                        });
+                    });
+
                     successCallback(listEvents);
                 } else {
                     const events = schedule

@@ -223,7 +223,7 @@ function getDaySchedule(date) {
         db.all(`
             SELECT a.time, a.is_occupied, app.name, app.phone, app.service, app.voucher_url 
             FROM availability a
-            LEFT JOIN appointments app ON a.date = app.date AND a.time = app.time
+            LEFT JOIN appointments app ON a.date = app.date AND a.time = app.time AND app.status = 'CONFIRMED'
             WHERE a.date = ?
             ORDER BY a.time
         `, [date], (err, rows) => {
@@ -255,7 +255,23 @@ function getDaySchedule(date) {
                     currentAppt = null;
                 }
             }
-            resolve(rows);
+
+            // Fetch cancellations and append them to the rows
+            db.all(`SELECT time, name, phone, service FROM appointments WHERE date = ? AND status = 'CANCELLED'`, [date], (err, cancRows) => {
+                if (!err && cancRows) {
+                    cancRows.forEach(c => {
+                        rows.push({
+                            time: c.time,
+                            name: c.name,
+                            phone: c.phone,
+                            service: c.service,
+                            is_occupied: 0,
+                            is_cancelled: true
+                        });
+                    });
+                }
+                resolve(rows);
+            });
         });
     });
 }
@@ -264,19 +280,25 @@ function getUpcomingReminders() {
     return new Promise((resolve, reject) => {
         const now = moment();
         const today = now.format('YYYY-MM-DD');
+        const tomorrow = now.clone().add(1, 'days').format('YYYY-MM-DD');
 
-        // Find appointments happening within the next 5 to 65 minutes
-        // (window catches any slot that falls in the "about 1 hour from now" range)
+        // Window for appointments happening within the next 5 to 65 minutes (1 hour)
         const windowStart = now.clone().add(5, 'minutes').format('HH:mm');
         const windowEnd   = now.clone().add(65, 'minutes').format('HH:mm');
 
         db.all(
-            `SELECT * FROM appointments
+            `SELECT *, '1h' as reminder_type FROM appointments
+             WHERE date = ?
+               AND time BETWEEN ? AND ?
+               AND status = 'CONFIRMED'
+               AND reminder_sent IN (0, 1)
+             UNION ALL
+             SELECT *, '24h' as reminder_type FROM appointments
              WHERE date = ?
                AND time BETWEEN ? AND ?
                AND status = 'CONFIRMED'
                AND reminder_sent = 0`,
-            [today, windowStart, windowEnd],
+            [today, windowStart, windowEnd, tomorrow, windowStart, windowEnd],
             (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows);
@@ -285,9 +307,9 @@ function getUpcomingReminders() {
     });
 }
 
-function markReminderSent(id) {
+function markReminderSent(id, level) {
     return new Promise((resolve, reject) => {
-        db.run("UPDATE appointments SET reminder_sent = 1 WHERE id = ?", [id], (err) => {
+        db.run("UPDATE appointments SET reminder_sent = ? WHERE id = ?", [level, id], (err) => {
             if (err) reject(err);
             else resolve();
         });
@@ -322,7 +344,7 @@ function cancelAppointment(date, time) {
                 allSlots.forEach(slotTime => {
                     db.run("UPDATE availability SET is_occupied = 0 WHERE date = ? AND time = ?", [date, slotTime]);
                 });
-                db.run("DELETE FROM appointments WHERE date = ? AND time = ?", [date, time]);
+                db.run("UPDATE appointments SET status = 'CANCELLED' WHERE date = ? AND time = ?", [date, time]);
                 db.run("COMMIT", (err) => {
                     if (err) {
                         db.run("ROLLBACK");

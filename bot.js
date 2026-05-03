@@ -329,19 +329,32 @@ client.on('message', async (msg) => {
             const cleanBody = body.toLowerCase().trim();
             const appointments = sessions[from].appointments;
             
+            // Helper function to check 24h rule and cancel
+            const processCancel = async (appt) => {
+                const aptMoment = moment(`${appt.date} ${appt.time}`, 'YYYY-MM-DD HH:mm');
+                const hoursLeft = aptMoment.diff(moment(), 'hours');
+                
+                if (hoursLeft < 24) {
+                    sessions[from].state = 'CONFIRMING_LATE_CANCEL';
+                    sessions[from].pendingCancelAppt = appt;
+                    await humanReply(msg, "⚠️ *Aviso de Políticas*\n\nPor políticas del estudio, si cancelas con menos de 24 horas de anticipación perderás tu abono.\n\n¿Deseas continuar con la cancelación?\n\n1. Sí, cancelar cita\n2. No, mantener cita");
+                } else {
+                    await cancelAppointment(appt.date, appt.time);
+                    await humanReply(msg, getRandomMsg([
+                        `✅ Listo, el turno del ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)} ha sido cancelado exitosamente. ¡Te esperamos pronto! 💖`,
+                        `✅ Ya anulamos tu cita del ${moment(appt.date).format('DD/MM')}. ¡Ojalá nos veamos en otra ocasión! ✨`,
+                        `✅ Turno cancelado correctamente. ¡Cuidate! 🌸`,
+                        `✅ Perfecto, ya eliminé esa reserva en específico. Quedo súper atenta 🌷`,
+                        `✅ Listo. Ese turno quedó completamente liberado. ¡Un abrazo! 🎀`
+                    ]));
+                    delete sessions[from];
+                }
+            };
+
             // Si solo habia un turno usamos el index 0 directo si responden con 1
             if (appointments.length === 1) {
                 if (cleanBody === '1' || cleanBody.includes('si')) {
-                    const appt = appointments[0];
-                    await cancelAppointment(appt.date, appt.time);
-                    await humanReply(msg, getRandomMsg([
-                        '✅ Listo, tu turno ha sido cancelado exitosamente. ¡Te esperamos en otra ocasión! 💖',
-                        '✅ Ya quedó cancelado. ¡Ojalá nos veamos prontito! ✨',
-                        '✅ No hay problema, reserva anulada. ¡Cuidate mucho! 🌸',
-                        '✅ Perfecto, ya eliminé tu cita. Quedo súper atenta a cuando quieras volver 🌷',
-                        '✅ Turno cancelado. ¡Recuerda que aquí siempre eres bienvenida! 🎀'
-                    ]));
-                    delete sessions[from];
+                    await processCancel(appointments[0]);
                 } else {
                     await humanReply(msg, getRandomMsg([
                         'Vale, mantenemos tu cita tal y como estaba. ¡Nos vemos! 💅',
@@ -356,16 +369,7 @@ client.on('message', async (msg) => {
                 // Hay multiples turnos, se dio una opcion numérica
                 const option = parseInt(cleanBody);
                 if (!isNaN(option) && option >= 1 && option <= appointments.length) {
-                    const appt = appointments[option - 1];
-                    await cancelAppointment(appt.date, appt.time);
-                    await humanReply(msg, getRandomMsg([
-                        `✅ Listo, el turno del ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)} ha sido cancelado exitosamente. ¡Te esperamos pronto! 💖`,
-                        `✅ Ya anulamos tu cita del ${moment(appt.date).format('DD/MM')}. ¡Ojalá nos veamos en otra ocasión! ✨`,
-                        `✅ Turno cancelado correctamente. ¡Cuidate! 🌸`,
-                        `✅ Perfecto, ya eliminé esa reserva en específico. Quedo súper atenta 🌷`,
-                        `✅ Listo. Ese turno quedó completamente liberado. ¡Un abrazo! 🎀`
-                    ]));
-                    delete sessions[from];
+                    await processCancel(appointments[option - 1]);
                 } else if (cleanBody === '8' || cleanBody.includes('no')) {
                     await humanReply(msg, getRandomMsg([
                         'Vale, mantenemos todas tus citas listas. ¡Beso! 💅',
@@ -379,11 +383,22 @@ client.on('message', async (msg) => {
                     await humanReply(msg, getRandomMsg([
                         'Ese número no está en la lista, dime el número de la cita que quieres cancelar 🌸',
                         'Disculpa, no te entendí bien. Responde solo con el numerito del turno que quieres borrar ✨',
-                        'elige un número de los de arribita porfi para saber cuál borro 💖',
-                        'necesito que me digas el numerito correcto de la cita 🌷',
-                        'porfa confírmame con el número (ej: 1 o 2) de la cita a cancelar 🎀'
+                        'Casi, pero no. Elige usando solo el número de las opciones que te di 💖'
                     ]));
                 }
+            }
+        }
+        else if (state === 'CONFIRMING_LATE_CANCEL') {
+            const cleanBody = body.toLowerCase().trim();
+            const appt = sessions[from].pendingCancelAppt;
+            
+            if (cleanBody === '1' || cleanBody.includes('si')) {
+                await cancelAppointment(appt.date, appt.time);
+                await humanReply(msg, `✅ Cita cancelada. De acuerdo a nuestras políticas, el abono no será reembolsado. ¡Te esperamos en otra oportunidad! 💖`);
+                delete sessions[from];
+            } else {
+                await humanReply(msg, `¡Perfecto! Hemos mantenido tu cita del ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)}. ¡Allí nos vemos! ✨`);
+                delete sessions[from];
             }
         } 
         else if (state === 'CHOOSING_DATE_INIT') {
