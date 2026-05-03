@@ -227,8 +227,35 @@ function getDaySchedule(date) {
             WHERE a.date = ?
             ORDER BY a.time
         `, [date], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
+            if (err) return reject(err);
+
+            // Post-process rows to fill in multi-hour appointment data
+            let currentAppt = null;
+            let slotsRemaining = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.name && row.service) { 
+                    // Start of an appointment
+                    const services = row.service.split(' + ');
+                    const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
+                    slotsRemaining = Math.max(1, Math.ceil(totalDuration / 60)) - 1;
+                    currentAppt = { ...row };
+                } else if (slotsRemaining > 0) { 
+                    // Continuation of a multi-hour appointment
+                    row.is_occupied = 1; // Force occupied in response
+                    row.name = currentAppt.name;
+                    row.phone = currentAppt.phone;
+                    row.service = currentAppt.service;
+                    row.voucher_url = currentAppt.voucher_url;
+                    slotsRemaining--;
+                } else {
+                    // Reset
+                    slotsRemaining = 0; 
+                    currentAppt = null;
+                }
+            }
+            resolve(rows);
         });
     });
 }
