@@ -605,17 +605,23 @@ client.on('message', async (msg) => {
                 sessions[from].totalDuration += (SERVICE_DURATIONS[selectedService] || 60);
                 sessions[from].service = sessions[from].services.join(' + ');
 
-                // Ask if they want to add another service
-                sessions[from].state = 'ADDING_MORE_SERVICES';
-                const totalMin = sessions[from].totalDuration;
-                const durText = totalMin >= 60
-                    ? `${Math.floor(totalMin/60)}h${totalMin%60 > 0 ? ` ${totalMin%60}min` : ''}`
-                    : `${totalMin}min`;
-                await humanReply(msg, getRandomMsg([
-                    `¡Excelente elección! 💖 Tienes *${sessions[from].service}* (${durText} en total). ¿Deseas agendar otro servicio para el mismo día?\n\n1. Sí, agregar otro servicio 💅\n2. No, con ese está perfecto ✨`,
-                    `¡Qué buen gusto! Elegiste *${sessions[from].service}* (${durText}). ¿Quieres combinar con otro servicio?\n\n1. Sí, agrego otro\n2. No, eso es todo`,
-                    `¡Anotado! *${sessions[from].service}* (${durText}). ¿Agregas algo más para ese día?\n\n1. Sí\n2. No, perfecto así`
-                ]));
+                // Check if they hit the maximum allowed services
+                if (sessions[from].services.length >= 2) {
+                    await humanReply(msg, `✅ Has seleccionado el máximo de 2 servicios por cita (*${sessions[from].service}*). ¡Vamos a agendar la hora! 💖`);
+                    await startChoosingSlot(msg, from, sessions[from].tempDate);
+                } else {
+                    // Ask if they want to add another service
+                    sessions[from].state = 'ADDING_MORE_SERVICES';
+                    const totalMin = sessions[from].totalDuration;
+                    const durText = totalMin >= 60
+                        ? `${Math.floor(totalMin/60)}h${totalMin%60 > 0 ? ` ${totalMin%60}min` : ''}`
+                        : `${totalMin}min`;
+                    await humanReply(msg, getRandomMsg([
+                        `¡Excelente elección! 💖 Tienes *${sessions[from].service}* (${durText} en total). ¿Deseas agendar otro servicio para el mismo día?\n\n1. Sí, agregar otro servicio 💅\n2. No, con ese está perfecto ✨`,
+                        `¡Qué buen gusto! Elegiste *${sessions[from].service}* (${durText}). ¿Quieres combinar con otro servicio?\n\n1. Sí, agrego otro\n2. No, eso es todo`,
+                        `¡Anotado! *${sessions[from].service}* (${durText}). ¿Agregas algo más para ese día?\n\n1. Sí\n2. No, perfecto así`
+                    ]));
+                }
             } else {
                 await humanReply(msg, "Esa opción no es válida, por favor elige un número de la lista que te mandé arribita 🌸");
             }
