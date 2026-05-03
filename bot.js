@@ -257,11 +257,11 @@ client.on('message', async (msg) => {
                     lastInteraction: Date.now()
                 };
                 await humanReply(msg, getRandomMsg([
-                    "¡Hola hermosa! 💖 ¿Qué día te gustaría agendar tu cita? ¿Para hoy u otro día?",
-                    "¡Hola nena! ✨ Qué gusto saludarte. ¿Deseas agendar para hoy o prefieres otra fecha?",
+                    "¡Hola! 💖 ¿Qué día te gustaría agendar tu cita? ¿Para hoy u otro día?",
+                    "¡Hola! ✨ Qué gusto saludarte. ¿Deseas agendar para hoy o prefieres otra fecha?",
                     "¡Hola muñeca! 🌸 Bienvenida a Barbara Beauty. ¿Para qué día quieres tu cita?",
-                    "¡Hola linda! 🌷 ¿Buscando quedar divina? Cuéntame, ¿para hoy o qué otro día te sirve?",
-                    "¡Hola reina! 🎀 ¡Lista para lucir hermosa! ¿Te agendo para hoy o tienes en mente otro día?"
+                    "¡Hola! 🌷 ¿Buscando quedar divina? Cuéntame, ¿para hoy o qué otro día te sirve?",
+                    "¡Hola! 🎀 ¡Lista para lucir! ¿Te agendo para hoy o tienes en mente otro día?"
                 ]));
             } else if (intentRes.action === 'CANCEL') {
                 sessions[from] = { 
@@ -269,11 +269,11 @@ client.on('message', async (msg) => {
                     lastInteraction: Date.now()
                 };
                 await humanReply(msg, getRandomMsg([
-                    "Entiendo hermosa. Para buscar tu cita y cancelarla, por favor envíame el número de celular con el que agendaste (ej: 3001234567) 🌸:",
-                    "Claro que sí nena. ¿Me ayudas escribiendo el número de teléfono con el que pediste tu turno para buscarlo? ✨",
-                    "Ay no te preocupes princesa, pásame tu número de WhatsApp aquí abajito para buscar y cancelar tu cita en el sistema 💖:",
-                    "Vale linda, vamos a buscarla. ¿Qué número de celular usaste para agendar tu cita? 🌷",
-                    "Entendido hermosa. Escríbeme tu numerito para poder cancelar la cita por este medio 🎀:"
+                    "Entiendo. Para buscar tu cita y cancelarla, por favor envíame el número de celular con el que agendaste (ej: 3001234567) 🌸:",
+                    "Claro que sí. ¿Me ayudas escribiendo el número de teléfono con el que pediste tu turno para buscarlo? ✨",
+                    "Disculpa, no te preocupes, pásame tu número de WhatsApp aquí abajito para buscar y cancelar tu cita en el sistema 💖:",
+                    "Vale, vamos a buscarla. ¿Qué número de celular usaste para agendar tu cita? 🌷",
+                    "Entendido. Escríbeme tu numerito para poder cancelar la cita por este medio 🎀:"
                 ]));
             } else {
                 console.log(`[WhatsApp] Message ignored. User wrote: "${body}"`);
@@ -293,20 +293,20 @@ client.on('message', async (msg) => {
                     const dateStr = moment(appt.date).format('DD/MM/YYYY');
                     const timeStr = formatTime12h(appt.time);
                     await humanReply(msg, getRandomMsg([
-                        `Veo que tienes un turno agendado para el *${dateStr}* a las *${timeStr}* para *${appt.service}*.\n\n¿Estás súper segura que deseas cancelarlo hermosa?\n1. Sí, cancelar\n2. No, mantener mi cita`,
-                        `Encontré un turno linda: es el *${dateStr}* a las *${timeStr}* para *${appt.service}*.\n\n¿Quieres que lo cancelemos?\n1. Sí, cancelar por favor\n2. No, déjalo así`,
-                        `¡Listo nena! Tienes cita el *${dateStr}* a las *${timeStr}* (*${appt.service}*).\n\n¿Me confirmas si la cancelamos definitivamente?\n1. Sí\n2. No, me arrepentí`,
-                        `Tu cita está para el *${dateStr}* a las *${timeStr}* (*${appt.service}*).\n\n¿Cancelamos hermosa?\n1. Sí, cancela\n2. No, mantengamos el turno`,
-                        `Princesa, tienes agendado *${appt.service}* el *${dateStr}* a las *${timeStr}*.\n\n¿Anulamos la reserva?\n1. Sí, anular\n2. No, voy a ir`
+                        `Veo que tienes un turno agendado para el *${dateStr}* a las *${timeStr}* para *${appt.service}*.\n\n¿Estás súper segura que deseas cancelarlo?\n1. Sí, cancelar\n2. No, mantener mi cita`,
+                        `Encontré un turno: es el *${dateStr}* a las *${timeStr}* para *${appt.service}*.\n\n¿Quieres que lo cancelemos?\n1. Sí, cancelar por favor\n2. No, déjalo así`,
+                        `¡Listo! Tienes cita el *${dateStr}* a las *${timeStr}* (*${appt.service}*).\n\n¿Me confirmas si la cancelamos definitivamente?\n1. Sí\n2. No, me arrepentí`,
+                        `Tu cita está para el *${dateStr}* a las *${timeStr}* (*${appt.service}*).\n\n¿Cancelamos?\n1. Sí, cancela\n2. No, mantengamos el turno`,
+                        `tienes agendado *${appt.service}* el *${dateStr}* a las *${timeStr}*.\n\n¿Anulamos la reserva?\n1. Sí, anular\n2. No, voy a ir`
                     ]));
                 } else {
                     // Hay varios turnos
                     let resp = getRandomMsg([
-                        "Tienes estos turnos princesa 💖:\n\n",
-                        "Encontré varias citas a tu nombre hermosa ✨:\n\n",
-                        "Nena, veo que tienes estas reservas activas 🌸:\n\n",
-                        "Mira linda, estos son tus turnos próximos 🌷:\n\n",
-                        "¡Tienes varios regalitos en la agenda reina! 🎀:\n\n"
+                        "Tienes estos turnos 💖:\n\n",
+                        "Encontré varias citas a tu nombre ✨:\n\n",
+                        "veo que tienes estas reservas activas 🌸:\n\n",
+                        "Mira, estos son tus turnos próximos 🌷:\n\n",
+                        "¡Tienes varios regalitos en la agenda! 🎀:\n\n"
                     ]);
                     upcomingList.forEach((appt, i) => {
                         resp += `${i + 1}. El ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)} - ${appt.service}\n`;
@@ -316,11 +316,11 @@ client.on('message', async (msg) => {
                 }
             } else {
                 await humanReply(msg, getRandomMsg([
-                    `Ay nena, revisé el sistema y no encuentro ningún turno agendado bajo el número *${phone}*. ¡Si te equivocaste, vuelve a enviarme "cancelar cita"! 🌸`,
-                    `Hermosa, no me aparece ninguna reserva con el número *${phone}*. ¿Seguro es ese? Si necesitas intentar de nuevo dime "cancelar" ✨`,
-                    `Princesa, el número *${phone}* no tiene citas pendientes ahorita. ¡Cualquier cosita escríbeme para agendar! 💖`,
-                    `Linda, parece ser que no hay nada agendado con el celular *${phone}*. ¡Vuelve a pedir cancelar si hay otro número! 🌷`,
-                    `¡Hola hermosa! Busqué el *${phone}* y no hay citas futuras. Si la liaste marcando, escríbeme de nuevo porfi 🎀`
+                    `Disculpa, revisé el sistema y no encuentro ningún turno agendado bajo el número *${phone}*. ¡Si te equivocaste, vuelve a enviarme "cancelar cita"! 🌸`,
+                    `no me aparece ninguna reserva con el número *${phone}*. ¿Seguro es ese? Si necesitas intentar de nuevo dime "cancelar" ✨`,
+                    `el número *${phone}* no tiene citas pendientes ahorita. ¡Cualquier cosita escríbeme para agendar! 💖`,
+                    `parece ser que no hay nada agendado con el celular *${phone}*. ¡Vuelve a pedir cancelar si hay otro número! 🌷`,
+                    `¡Hola! Busqué el *${phone}* y no hay citas futuras. Si la liaste marcando, escríbeme de nuevo porfi 🎀`
                 ]));
                 delete sessions[from];
             }
@@ -335,20 +335,20 @@ client.on('message', async (msg) => {
                     const appt = appointments[0];
                     await cancelAppointment(appt.date, appt.time);
                     await humanReply(msg, getRandomMsg([
-                        '✅ Listo hermosa, tu turno ha sido cancelado exitosamente. ¡Te esperamos en otra ocasión! 💖',
-                        '✅ Ya quedó cancelado princesa. ¡Ojalá nos veamos prontito! ✨',
-                        '✅ No hay problema nena, reserva anulada. ¡Cuidate mucho! 🌸',
-                        '✅ Perfecto linda, ya eliminé tu cita. Quedo súper atenta a cuando quieras volver 🌷',
-                        '✅ Turno cancelado reina. ¡Recuerda que aquí siempre eres bienvenida! 🎀'
+                        '✅ Listo, tu turno ha sido cancelado exitosamente. ¡Te esperamos en otra ocasión! 💖',
+                        '✅ Ya quedó cancelado. ¡Ojalá nos veamos prontito! ✨',
+                        '✅ No hay problema, reserva anulada. ¡Cuidate mucho! 🌸',
+                        '✅ Perfecto, ya eliminé tu cita. Quedo súper atenta a cuando quieras volver 🌷',
+                        '✅ Turno cancelado. ¡Recuerda que aquí siempre eres bienvenida! 🎀'
                     ]));
                     delete sessions[from];
                 } else {
                     await humanReply(msg, getRandomMsg([
-                        'Vale linda, mantenemos tu cita tal y como estaba. ¡Nos vemos! 💅',
-                        'Súper hermosa, dejamos el turno agendado. ¡Aquí te espero! ✨',
-                        '¡Me alegra princesa! Cita confirmada y sin cancelar. Nos vemos 💖',
-                        'Entendido nena, no se cancela nada. ¡Ve preparando la mirada! 🌸',
-                        'Vale reina, tu espacio sigue 100% asegurado. ¡Qué emoción! 🎀'
+                        'Vale, mantenemos tu cita tal y como estaba. ¡Nos vemos! 💅',
+                        'Súper, dejamos el turno agendado. ¡Aquí te espero! ✨',
+                        '¡Me alegra! Cita confirmada y sin cancelar. Nos vemos 💖',
+                        'Entendido, no se cancela nada. ¡Ve preparando la mirada! 🌸',
+                        'Vale, tu espacio sigue 100% asegurado. ¡Qué emoción! 🎀'
                     ]));
                     delete sessions[from];
                 }
@@ -359,29 +359,29 @@ client.on('message', async (msg) => {
                     const appt = appointments[option - 1];
                     await cancelAppointment(appt.date, appt.time);
                     await humanReply(msg, getRandomMsg([
-                        `✅ Listo hermosa, el turno del ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)} ha sido cancelado exitosamente. ¡Te esperamos pronto! 💖`,
-                        `✅ Ya anulamos tu cita del ${moment(appt.date).format('DD/MM')} nena. ¡Ojalá nos veamos en otra ocasión! ✨`,
-                        `✅ Turno cancelado correctamente princesa. ¡Cuidate! 🌸`,
-                        `✅ Perfecto linda, ya eliminé esa reserva en específico. Quedo súper atenta 🌷`,
-                        `✅ Listo reina. Ese turno quedó completamente liberado. ¡Un abrazo! 🎀`
+                        `✅ Listo, el turno del ${moment(appt.date).format('DD/MM')} a las ${formatTime12h(appt.time)} ha sido cancelado exitosamente. ¡Te esperamos pronto! 💖`,
+                        `✅ Ya anulamos tu cita del ${moment(appt.date).format('DD/MM')}. ¡Ojalá nos veamos en otra ocasión! ✨`,
+                        `✅ Turno cancelado correctamente. ¡Cuidate! 🌸`,
+                        `✅ Perfecto, ya eliminé esa reserva en específico. Quedo súper atenta 🌷`,
+                        `✅ Listo. Ese turno quedó completamente liberado. ¡Un abrazo! 🎀`
                     ]));
                     delete sessions[from];
                 } else if (cleanBody === '8' || cleanBody.includes('no')) {
                     await humanReply(msg, getRandomMsg([
-                        'Vale linda, mantenemos todas tus citas listas. ¡Beso! 💅',
-                        'Súper hermosa, no voy a cancelar nada. ¡Aquí te espero! ✨',
-                        '¡Princesa! Citas aseguradas sin tocar. Nos vemos pronto 💖',
-                        'Entendido nena, no se toca tu agenda. 🌸',
-                        'Vale reina, todo sigue igual para consentirte. 🎀'
+                        'Vale, mantenemos todas tus citas listas. ¡Beso! 💅',
+                        'Súper, no voy a cancelar nada. ¡Aquí te espero! ✨',
+                        '¡Excelente! Citas aseguradas sin tocar. Nos vemos pronto 💖',
+                        'Entendido, no se toca tu agenda. 🌸',
+                        'Vale, todo sigue igual para consentirte. 🎀'
                     ]));
                     delete sessions[from];
                 } else {
                     await humanReply(msg, getRandomMsg([
-                        'Ese número no está en la lista nena, dime el número de la cita que quieres cancelar 🌸',
-                        'Uy hermosa, no te entendí bien. Responde solo con el numerito del turno que quieres borrar ✨',
-                        'Princesa, elige un número de los de arribita porfi para saber cuál borro 💖',
-                        'Linda, necesito que me digas el numerito correcto de la cita 🌷',
-                        'Reina, porfa confírmame con el número (ej: 1 o 2) de la cita a cancelar 🎀'
+                        'Ese número no está en la lista, dime el número de la cita que quieres cancelar 🌸',
+                        'Disculpa, no te entendí bien. Responde solo con el numerito del turno que quieres borrar ✨',
+                        'elige un número de los de arribita porfi para saber cuál borro 💖',
+                        'necesito que me digas el numerito correcto de la cita 🌷',
+                        'porfa confírmame con el número (ej: 1 o 2) de la cita a cancelar 🎀'
                     ]));
                 }
             }
@@ -392,11 +392,11 @@ client.on('message', async (msg) => {
                 const parsedMoment = moment(date);
                 if (parsedMoment.day() === 0) {
                     await humanReply(msg, getRandomMsg([
-                        "Ay hermosa, los domingos descansamos ✨. ¿Te gustaría agendar para el lunes o cualquier otro día?",
-                        "Princesa, los domingos no laboramos 🌸. Dime qué otro día de la semana te sirve para dejarte divina.",
-                        "Linda, los domingos cerramos para descansar 💖. ¿Buscamos un huequito el sábado o el lunes?",
-                        "Reina, los domingos no atendemos 🌷. Porfa dime otro día que te quede súper bien.",
-                        "Nena, el domingo es nuestro día libre 🎀. Pero el lunes arrancamos con toda, ¿te agendo para otro día?"
+                        "Disculpa, los domingos descansamos ✨. ¿Te gustaría agendar para el lunes o cualquier otro día?",
+                        "los domingos no laboramos 🌸. Dime qué otro día de la semana te sirve para dejarte divina.",
+                        "los domingos cerramos para descansar 💖. ¿Buscamos un huequito el sábado o el lunes?",
+                        "los domingos no atendemos 🌷. Porfa dime otro día que te quede súper bien.",
+                        "el domingo es nuestro día libre 🎀. Pero el lunes arrancamos con toda, ¿te agendo para otro día?"
                     ]));
                     return;
                 }
@@ -406,11 +406,11 @@ client.on('message', async (msg) => {
                 const currentHour = moment().hour();
                 if (isToday && currentHour >= 18) {
                     await humanReply(msg, getRandomMsg([
-                        "Ay hermosa, ya cerramos la agenda para hoy 🌸. ¿Te agendo mejor para mañana o cualquier otro día?",
-                        "Nena, después de las 6 PM ya no podemos recibir citas para el mismo día 💖. ¿Para qué otro día te busco espacio?",
-                        "Princesa, la agenda del día de hoy ya está cerrada ✨. Dime para qué día te gustaría y con gusto te agendo.",
-                        "Linda, ya pasó el horario de atención de hoy 🌷. Pero mañana arrancamos desde las 8 AM, ¿te sirve?",
-                        "Reina, no puedo agendarte para hoy tan tarde 🎀. ¿Para mañana o cuándo te queda mejor?"
+                        "Disculpa, ya cerramos la agenda para hoy 🌸. ¿Te agendo mejor para mañana o cualquier otro día?",
+                        "después de las 6 PM ya no podemos recibir citas para el mismo día 💖. ¿Para qué otro día te busco espacio?",
+                        "la agenda del día de hoy ya está cerrada ✨. Dime para qué día te gustaría y con gusto te agendo.",
+                        "ya pasó el horario de atención de hoy 🌷. Pero mañana arrancamos desde las 8 AM, ¿te sirve?",
+                        "no puedo agendarte para hoy tan tarde 🎀. ¿Para mañana o cuándo te queda mejor?"
                     ]));
                     return;
                 }
@@ -421,19 +421,19 @@ client.on('message', async (msg) => {
                 sessions[from].state = 'CONFIRMING_DATE';
                 sessions[from].tempDate = date;
                 await humanReply(msg, getRandomMsg([
-                    `¿Me confirmas que es para el ${dayName} ${formattedDate}, hermosa?\n1. Sí\n2. No`,
-                    `¡Súper! Entonces, ¿buscamos espacio para el ${dayName} ${formattedDate} nena?\n1. ¡Sí!\n2. No, me equivoqué`,
-                    `Princesa, para estar segura: sería para el ${dayName} ${formattedDate}, ¿verdad?\n1. Sí total\n2. No, otro día`,
-                    `Linda, confirmando... ¿para el ${dayName} ${formattedDate}?\n1. Sí es para ese día\n2. No reina`,
-                    `Para el ${dayName} ${formattedDate}... ¿está todo en orden hermosa?\n1. Sí\n2. Cámbiame el día`
+                    `¿Me confirmas que es para el ${dayName} ${formattedDate},?\n1. Sí\n2. No`,
+                    `¡Súper! Entonces, ¿buscamos espacio para el ${dayName} ${formattedDate}?\n1. ¡Sí!\n2. No, me equivoqué`,
+                    `para estar segura: sería para el ${dayName} ${formattedDate}, ¿verdad?\n1. Sí total\n2. No, otro día`,
+                    `confirmando... ¿para el ${dayName} ${formattedDate}?\n1. Sí es para ese día\n2. No`,
+                    `Para el ${dayName} ${formattedDate}... ¿está todo en orden?\n1. Sí\n2. Cámbiame el día`
                 ]));
             } else {
                 await humanReply(msg, getRandomMsg([
-                    'No te entendí bien hermosa, ¿me dices qué día exactamente? (ej: "hoy", "mañana", "el viernes") 🌸',
-                    'Uy nena qué pena no logré entenderte. ¿Será para hoy, mañana o pasado? ✨',
-                    'Ay princesa, explícamelo un poco más claro. ¿Cuándo quieres venir? 💖',
-                    'Linda, dime el día más facilito (por ejemplo "lunes", o "hoy") para encontrarte espacio 🌷',
-                    'Reina, no agarré bien el día. ¿Me lo puedes repetir bien claro? 🎀'
+                    'No te entendí bien, ¿me dices qué día exactamente? (ej: "hoy", "mañana", "el viernes") 🌸',
+                    'Disculpa, qué pena no logré entenderte. ¿Será para hoy, mañana o pasado? ✨',
+                    'Disculpa, explícamelo un poco más claro. ¿Cuándo quieres venir? 💖',
+                    'dime el día más facilito (por ejemplo "lunes", o "hoy") para encontrarte espacio 🌷',
+                    'no agarré bien el día. ¿Me lo puedes repetir bien claro? 🎀'
                 ]));
             }
         }
@@ -441,18 +441,18 @@ client.on('message', async (msg) => {
             if (isYes(body)) {
                 sessions[from].state = 'CHOOSING_FLOW_TYPE';
                 await humanReply(msg, getRandomMsg([
-                    `¡Perfecto hermosa! Antes de ver los servicios, cuéntame:\n\n1. Es mi Montura por Primera Vez ✨\n2. Es un Retoque 🌸`,
-                    `¡Anotado nena! ¿Deseas agendar:\n\n1. Montura Primera Vez\n2. Un Retoque del servicio?`,
-                    `¡Listo princesa! Ayúdame con esto porfi:\n\n1. Voy por primera vez\n2. Ya tengo el servicio y vengo a retoque`
+                    `¡Perfecto! Antes de ver los servicios, cuéntame:\n\n1. Es mi Montura por Primera Vez ✨\n2. Es un Retoque 🌸`,
+                    `¡Anotado! ¿Deseas agendar:\n\n1. Montura Primera Vez\n2. Un Retoque del servicio?`,
+                    `¡Listo! Disculpa,údame con esto porfi:\n\n1. Voy por primera vez\n2. Ya tengo el servicio y vengo a retoque`
                 ]));
             } else {
                 sessions[from].state = 'CHOOSING_DATE_INIT';
                 await humanReply(msg, getRandomMsg([
-                    'Vale nena, ¿entonces para qué día te gustaría agendar? ✨',
-                    'No pasa nada hermosa. Dime qué otra fechita te sirve 🌸',
-                    'Entendido princesa. Pásame el día que realmente quieres para buscar lugar 💖',
-                    'Tranquila linda, entonces dime qué otro día y revisamos si hay huequito 🌷',
-                    'Vale reina. Volvamos a intentar. ¿Para cuándo te gustaría la cita? 🎀'
+                    'Vale, ¿entonces para qué día te gustaría agendar? ✨',
+                    'No pasa nada. Dime qué otra fechita te sirve 🌸',
+                    'Entendido. Pásame el día que realmente quieres para buscar lugar 💖',
+                    'Tranquila, entonces dime qué otro día y revisamos si hay huequito 🌷',
+                    'Vale. Volvamos a intentar. ¿Para cuándo te gustaría la cita? 🎀'
                 ]));
             }
         }
@@ -461,13 +461,13 @@ client.on('message', async (msg) => {
             if (cleanBody === '1' || cleanBody.includes('primera')) {
                 sessions[from].flowType = 'PRIMERA_VEZ';
                 sessions[from].state = 'CHOOSING_SERVICE';
-                await humanReply(msg, "¡Qué emoción nena! Como es tu primera vez, ¿qué servicio deseas realizarte? ✨\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
+                await humanReply(msg, "¡Qué emoción! Como es tu primera vez, ¿qué servicio deseas realizarte? ✨\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
             } else if (cleanBody === '2' || cleanBody.includes('retoque')) {
                 sessions[from].flowType = 'RETOQUE';
                 sessions[from].state = 'CHOOSING_SERVICE';
-                await humanReply(msg, "¿Súper! ¿Un retoque de cuál servicio te vas a realizar hermosa? 🌸\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
+                await humanReply(msg, "¿Súper! ¿Un retoque de cuál servicio te vas a realizar? 🌸\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀");
             } else {
-                await humanReply(msg, "Por favor elige 1 o 2 hermosa ✨");
+                await humanReply(msg, "Por favor elige 1 o 2 ✨");
             }
         }
         else if (state === 'CHOOSING_SERVICE') {
@@ -504,26 +504,26 @@ client.on('message', async (msg) => {
                         await chat.clearState();
 
                         const media = MessageMedia.fromFilePath(catalogPath);
-                        await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios hermosa ✨' });
+                        await client.sendMessage(from, media, { caption: 'Aquí tienes nuestro catálogo de servicios ✨' });
 
                         // ✅ ANTI-BAN: Pause between PDF and the follow-up text message
                         await randomDelay(3000, 6000);
-                        await humanReply(msg, `¿Y bien nena? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀\n6. No deseo otro servicio, continuar ✅`);
+                        await humanReply(msg, `¿Y bien? ¿Cuál de estas categorías te interesa ahora? ${isRetoque ? '(Retoque)' : ''}\n\n1. Ver catálogo de servicios 📄\n2. Diseño de Cejas ✒️\n3. Extensiones de Pestañas 👁️\n4. Pestañas Tecnológicas 🧬\n5. Efectos Especiales 🎀\n6. No deseo otro servicio, continuar ✅`);
                     } else {
-                        await humanReply(msg, "Ay nena, no pude encontrar el catálogo en este momento.");
+                        await humanReply(msg, "Disculpa, no pude encontrar el catálogo en este momento.");
                     }
                 } catch (err) {
                     console.error("Error sending catalog:", err);
-                    await humanReply(msg, "Hubo un problemita enviando el archivo nena, pero dime qué categoría te interesa 🌸");
+                    await humanReply(msg, "Hubo un problemita enviando el archivo, pero dime qué categoría te interesa 🌸");
                 }
             } else if (option === 2) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'CEJAS';
-                await humanReply(msg, `Perfecto, ¿qué diseño de cejas ${isRetoque ? '(Retoque)' : ''} te gustaría? ✨:\n\n1️⃣ Soft Brows (diseño + pigmentación)\n2️⃣ Luxe Lift Brows (laminado)\n3️⃣ Clean Shape (solo diseño)\n\nResponde con el numerito hermosa 💖`);
+                await humanReply(msg, `Perfecto, ¿qué diseño de cejas ${isRetoque ? '(Retoque)' : ''} te gustaría? ✨:\n\n1️⃣ Soft Brows (diseño + pigmentación)\n2️⃣ Luxe Lift Brows (laminado)\n3️⃣ Clean Shape (solo diseño)\n\nResponde con el numerito 💖`);
             } else if (option === 3) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'EXTENSIONES';
-                await humanReply(msg, `¡Me encanta esa opción! ¿Qué estilo de extensiones ${isRetoque ? '(Retoque)' : ''} prefieres? 👁️:\n\n1️⃣ Lash Bloom (lifting)\n2️⃣ Classic Glow (natural)\n3️⃣ Deep Black Lash (efecto pestañina)\n4️⃣ Glam Lash (volumen ruso)\n\nDime el número princesa ✨`);
+                await humanReply(msg, `¡Me encanta esa opción! ¿Qué estilo de extensiones ${isRetoque ? '(Retoque)' : ''} prefieres? 👁️:\n\n1️⃣ Lash Bloom (lifting)\n2️⃣ Classic Glow (natural)\n3️⃣ Deep Black Lash (efecto pestañina)\n4️⃣ Glam Lash (volumen ruso)\n\nDime el número ✨`);
             } else if (option === 4) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'TECNOLOGICAS';
@@ -531,9 +531,9 @@ client.on('message', async (msg) => {
             } else if (option === 5) {
                 sessions[from].state = 'CHOOSING_SUB_SERVICE';
                 sessions[from].category = 'EFECTOS';
-                await humanReply(msg, `¡Para lucir espectacular! ¿Qué efecto especial ${isRetoque ? '(Retoque)' : ''} quieres? 🎀:\n\n1️⃣ Wispy Look\n2️⃣ Kim-K Look\n3️⃣ Comics Look\n4️⃣ Foxy Tech\n\nElige con el numerito reina ✨`);
+                await humanReply(msg, `¡Para lucir espectacular! ¿Qué efecto especial ${isRetoque ? '(Retoque)' : ''} quieres? 🎀:\n\n1️⃣ Wispy Look\n2️⃣ Kim-K Look\n3️⃣ Comics Look\n4️⃣ Foxy Tech\n\nElige con el numerito ✨`);
             } else {
-                await humanReply(msg, "Por favor elige una opción del 1 al 5 hermosa 🌸");
+                await humanReply(msg, "Por favor elige una opción del 1 al 5 🌸");
             }
         }
         else if (state === 'CHOOSING_SUB_SERVICE') {
@@ -597,12 +597,12 @@ client.on('message', async (msg) => {
                     ? `${Math.floor(totalMin/60)}h${totalMin%60 > 0 ? ` ${totalMin%60}min` : ''}`
                     : `${totalMin}min`;
                 await humanReply(msg, getRandomMsg([
-                    `¡Excelente elección hermosa! 💖 Tienes *${sessions[from].service}* (${durText} en total). ¿Deseas agendar otro servicio para el mismo día?\n\n1. Sí, agregar otro servicio 💅\n2. No, con ese está perfecto ✨`,
-                    `¡Qué buen gusto nena! Elegiste *${sessions[from].service}* (${durText}). ¿Quieres combinar con otro servicio?\n\n1. Sí, agrego otro\n2. No, eso es todo`,
-                    `¡Anotado princesa! *${sessions[from].service}* (${durText}). ¿Agregas algo más para ese día?\n\n1. Sí\n2. No, perfecto así`
+                    `¡Excelente elección! 💖 Tienes *${sessions[from].service}* (${durText} en total). ¿Deseas agendar otro servicio para el mismo día?\n\n1. Sí, agregar otro servicio 💅\n2. No, con ese está perfecto ✨`,
+                    `¡Qué buen gusto! Elegiste *${sessions[from].service}* (${durText}). ¿Quieres combinar con otro servicio?\n\n1. Sí, agrego otro\n2. No, eso es todo`,
+                    `¡Anotado! *${sessions[from].service}* (${durText}). ¿Agregas algo más para ese día?\n\n1. Sí\n2. No, perfecto así`
                 ]));
             } else {
-                await humanReply(msg, "Esa opción no es válida nena, por favor elige un número de la lista que te mandé arribita 🌸");
+                await humanReply(msg, "Esa opción no es válida, por favor elige un número de la lista que te mandé arribita 🌸");
             }
         }
         else if (state === 'ADDING_MORE_SERVICES') {
@@ -615,7 +615,7 @@ client.on('message', async (msg) => {
                 // ✅ Both flows now show the slot first, payment (if PRIMERA_VEZ) comes AFTER slot is chosen
                 await startChoosingSlot(msg, from, sessions[from].tempDate);
             } else {
-                await humanReply(msg, 'Por favor responde *1* para agregar otro servicio, o *2* si ya terminaste hermosa 🌸');
+                await humanReply(msg, 'Por favor responde *1* para agregar otro servicio, o *2* si ya terminaste 🌸');
             }
         }
         else if (state === 'WAITING_PAYMENT_VOUCHER') {
@@ -628,23 +628,23 @@ client.on('message', async (msg) => {
                         fs.writeFileSync(savePath, media.data, { encoding: 'base64' });
                         
                         sessions[from].voucherUrl = `/vouchers/${filename}`;
-                        await humanReply(msg, "¡Recibido hermosa! ✨ Gracias por enviar el comprobante. Ahora cuéntame:");
+                        await humanReply(msg, "¡Recibido! ✨ Gracias por enviar el comprobante. Ahora cuéntame:");
                         // After payment, go to get name
                         sessions[from].state = 'GETTING_NAME';
                         await humanReply(msg, getRandomMsg([
-                            '¿A qué nombre agendamos la cita hermosa? ✨',
+                            '¿A qué nombre agendamos la cita? ✨',
                             'Regálame tu nombre completo para dejar el turno asegurado 🌸',
-                            '¿Cómo te llamas nena? Lo necesito para la agenda 💖',
+                            '¿Cómo te llamas? Lo necesito para la agenda 💖',
                             'Escríbeme tu nombre completo para poner el turno a tu nombre 🌷',
-                            '¿Tu nombre completo princesa? Así te pongo en el sistema 🎀'
+                            '¿Tu nombre completo? Así te pongo en el sistema 🎀'
                         ]));
                     }
                 } catch (err) {
                     console.error("Error downloading voucher:", err);
-                    await humanReply(msg, "Hubo un problemita guardando la imagen nena, ¿podrías enviarla de nuevo porfa? 🌸");
+                    await humanReply(msg, "Hubo un problemita guardando la imagen, ¿podrías enviarla de nuevo porfa? 🌸");
                 }
             } else {
-                await humanReply(msg, "Por favor hermosa, *envía el soporte de transferencia en una foto* para poder continuar con tu agendamiento 💖. Sin el comprobante no puedo separar tu cupo.");
+                await humanReply(msg, "Por favor, *envía el soporte de transferencia en una foto* para poder continuar con tu agendamiento 💖. Sin el comprobante no puedo separar tu cupo.");
             }
         }
         else if (state === 'CHOOSING_SLOT') {
@@ -653,11 +653,11 @@ client.on('message', async (msg) => {
 
             if (isNaN(index) || index < 0 || index >= slots.length) {
                 await humanReply(msg, getRandomMsg([
-                    'Ese numerito no está en la lista nena, intenta de nuevo porfa. 🌸',
-                    'Hermosa, no veo la hora con ese número. Escoge de los que te mandé arribita ✨',
-                    'Princesa, ¿segura que mandaste el número correcto? Inténtalo otra vez 💖',
-                    'Linda, elige con el número que sale al lado de la hora para agarrarte el puesto 🌷',
-                    'Uy reina, casi. Escríbeme el numerito que está junto a la hora disponible 🎀'
+                    'Ese numerito no está en la lista, intenta de nuevo porfa. 🌸',
+                    'no veo la hora con ese número. Escoge de los que te mandé arribita ✨',
+                    '¿segura que mandaste el número correcto? Inténtalo otra vez 💖',
+                    'elige con el número que sale al lado de la hora para agarrarte el puesto 🌷',
+                    'Disculpa, casi. Escríbeme el numerito que está junto a la hora disponible 🎀'
                 ]));
             } else {
                 const selectedTime = slots[index];
@@ -672,15 +672,15 @@ client.on('message', async (msg) => {
                         ? `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS (${servicesList}) = $${deposit.toLocaleString()} ANTES DE LA CITA PARA PODER AGENDARTE!*`
                         : `*SE DEBE CANCELAR EL 40% DEL VALOR TOTAL DE LOS SERVICIOS ESTO ANTES DE LA CITA PARA PODER AGENDARTE!*`;
                     sessions[from].state = 'WAITING_PAYMENT_VOUCHER';
-                    await humanReply(msg, `¡Perfecto hermosa! Separé tu hora ✨ Para confirmar tu primera cita, necesito el comprobante de pago:\n\n${depositText}\n\n*OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes *15 minutos* para enviarlo antes de que se libere el turno)`);
+                    await humanReply(msg, `¡Perfecto! Separé tu hora ✨ Para confirmar tu primera cita, necesito el comprobante de pago:\n\n${depositText}\n\n*OPCIONES DE PAGO*\n\n*Bancolombia*\nBárbara Silva\nCuenta Ahorros\n07800002953\n\n*Nequi*\nBárbara Silva\n3150640169\n\n*Llaves de Nu*\n@BSS279\n\n*POR FAVOR ADJUNTA EL SOPORTE DE TRANSFERENCIA AQUÍ ABAJO* ✨\n(Tienes *15 minutos* para enviarlo antes de que se libere el turno)`);
                 } else {
                     sessions[from].state = 'GETTING_NAME';
                     await humanReply(msg, getRandomMsg([
-                        '¡Súper! ¿A qué nombre agendamos la cita hermosa? ✨',
-                        '¡Genial! Regálame tu nombrecito y apellido para asegurar tu agenda nena 🌸',
-                        '¡Qué bien princesa! ¿Cómo te llamas para dejarlo guardadito? 💖',
-                        'Perfecto linda. Dime tu nombre completo para el sistema porfi 🌷',
-                        '¡Ya casi reina! Escríbeme tu nombre para ponerte en el calendario 🎀'
+                        '¡Súper! ¿A qué nombre agendamos la cita? ✨',
+                        '¡Genial! Regálame tu nombrecito y apellido para asegurar tu agenda 🌸',
+                        '¡Qué bien! ¿Cómo te llamas para dejarlo guardadito? 💖',
+                        'Perfecto. Dime tu nombre completo para el sistema porfi 🌷',
+                        '¡Ya casi! Escríbeme tu nombre para ponerte en el calendario 🎀'
                     ]));
                 }
             }
@@ -691,8 +691,8 @@ client.on('message', async (msg) => {
             await humanReply(msg, getRandomMsg([
                 `Un gusto ${body} ✨. Ahora regálame tu número de celular para enviarte la confirmación:`,
                 `Súper ${body} 🌸. Por fa regálame tu número de teléfono para dejarte lista en la agenda:`,
-                `Ay princesa ${body} 💖. Déjame tu numerito de celu aquí para enviarte recordatorios luego:`,
-                `Listo linda ${body} 🌷. Para confirmar tu asistencia, dime tu número telefónico:`,
+                `Disculpa, ${body} 💖. Déjame tu numerito de celu aquí para enviarte recordatorios luego:`,
+                `Listo ${body} 🌷. Para confirmar tu asistencia, dime tu número telefónico:`,
                 `Encantada de atenderte ${body} 🎀. Cierra con broche de oro regalándome tu número de WhatsApp aquí abajo:`
             ]));
         }
@@ -700,21 +700,21 @@ client.on('message', async (msg) => {
             const rawPhone = body.replace(/\D/g, '');
             if (rawPhone.length < 7) {
                 await humanReply(msg, getRandomMsg([
-                    'Ese número parece faltarle dígitos nena, revísalo y escríbelo de nuevo porfa 🌸:',
-                    'Ay hermosa, ese número se ve cortito. ¿Me lo pasas de nuevo con todos los números? ✨:',
-                    'Princesa, revisa que no le falte un número a tu celu e intenta otra vez 💖:',
-                    'Linda, como que ese no está completico. Escríbelo súper bien por favor 🌷:',
-                    'Reina, ¡revisa bien! Parece que digitaste mal el número, mándalo de nuevo 🎀:'
+                    'Ese número parece faltarle dígitos, revísalo y escríbelo de nuevo porfa 🌸:',
+                    'Disculpa, ese número se ve cortito. ¿Me lo pasas de nuevo con todos los números? ✨:',
+                    'revisa que no le falte un número a tu celu e intenta otra vez 💖:',
+                    'como que ese no está completico. Escríbelo súper bien por favor 🌷:',
+                    '¡revisa bien! Parece que digitaste mal el número, mándalo de nuevo 🎀:'
                 ]));
             } else {
                 sessions[from].extractedPhone = rawPhone;
                 sessions[from].state = 'CONFIRMING_PHONE';
                 await humanReply(msg, getRandomMsg([
                     `Confírmame si tu número es el *${rawPhone}*:\n\n1. Sí, es correcto\n2. No, lo escribí mal`,
-                    `¿Está bien el *${rawPhone}* hermosa?\n\n1. Súper bien\n2. Lo pasé mal`,
-                    `Princesa, me diste el *${rawPhone}*, ¿está correcto?\n\n1. Sí\n2. No reina`,
-                    `Linda, confirmando tu celu: *${rawPhone}*. ¿Quedó bien?\n\n1. Perfecto\n2. Me equivoqué`,
-                    `Reina, veo que mandaste *${rawPhone}*. ¿Seguro que es ese?\n\n1. Totalmente\n2. Fallé en un número`
+                    `¿Está bien el *${rawPhone}*?\n\n1. Súper bien\n2. Lo pasé mal`,
+                    `me diste el *${rawPhone}*, ¿está correcto?\n\n1. Sí\n2. No`,
+                    `confirmando tu celu: *${rawPhone}*. ¿Quedó bien?\n\n1. Perfecto\n2. Me equivoqué`,
+                    `veo que mandaste *${rawPhone}*. ¿Seguro que es ese?\n\n1. Totalmente\n2. Fallé en un número`
                 ]));
             }
         }
@@ -730,11 +730,11 @@ client.on('message', async (msg) => {
                     const timeStr = formatTime12h(context.time);
                     const dateStr = moment(context.tempDate).format('DD/MM/YYYY');
                     await humanReply(msg, getRandomMsg([
-                        `¡Listo hermosa! 🎀 Ya quedó confirmada tu cita para realizarte *${context.service}*.\nNos vemos el *${dateStr}* a las *${timeStr}*. ¡Te esperamos! ✨`,
-                        `¡Quedaste agendada nena! 🌸 Vamos a hacerte *${context.service}* el *${dateStr}* a la hora acordada (*${timeStr}*). ¡Nos vemos para dejarte bella! 💖`,
-                        `¡Súper lista princesa! 👑 Ya salvaste tu campito el *${dateStr}* a las *${timeStr}*. Prepárate para lucir *${context.service}* espectaculares. 💖`,
-                        `¡Todo confirmado linda! 🌷 Quedó para el *${dateStr}* a las *${timeStr}* para que te hagas *${context.service}*. Aquí te esperamos ansiosas ✨.`,
-                        `¡Agendada exitosamente reina! 🎀 Tu servicio será *${context.service}* y nos veremos el *${dateStr}* a las *${timeStr}*. ¡Un abrazo! 🌸`
+                        `¡Listo! 🎀 Ya quedó confirmada tu cita para realizarte *${context.service}*.\nNos vemos el *${dateStr}* a las *${timeStr}*. ¡Te esperamos! ✨`,
+                        `¡Quedaste agendada! 🌸 Vamos a hacerte *${context.service}* el *${dateStr}* a la hora acordada (*${timeStr}*). ¡Nos vemos para dejarte! 💖`,
+                        `¡Súper lista! 👑 Ya salvaste tu campito el *${dateStr}* a las *${timeStr}*. Prepárate para lucir *${context.service}* espectaculares. 💖`,
+                        `¡Todo confirmado! 🌷 Quedó para el *${dateStr}* a las *${timeStr}* para que te hagas *${context.service}*. Aquí te esperamos ansiosas ✨.`,
+                        `¡Agendada exitosamente! 🎀 Tu servicio será *${context.service}* y nos veremos el *${dateStr}* a las *${timeStr}*. ¡Un abrazo! 🌸`
                     ]));
 
                     // ✅ Send policies as a follow-up after confirmation
@@ -760,22 +760,22 @@ client.on('message', async (msg) => {
                     delete sessions[from];
                 } else {
                     await humanReply(msg, getRandomMsg([
-                        'Ay hermosa, justo ese horario se acaba de ocupar 😔. Intentemos de nuevo pidiendo disponibilidad.',
-                        'Qué mala suerte nena, alguien nos robó ese huequito recién ✨. Escribe de nuevo "citas" para mirar otro lugar.',
-                        'Princesa, el sistema acaba de reportar que se bloqueó el campito 💔. Vuelve a decir "agendar" para buscar otro.',
-                        'Uy linda, se nos adelantaron por poco. Intenta hacer el proceso otra vez, no tardamos nada 🌸',
-                        'Reina, ¡la suerte no alcanzó! Se llenó la hora justico. Escribe para intentarlo otra vez 🎀'
+                        'Disculpa, justo ese horario se acaba de ocupar 😔. Intentemos de nuevo pidiendo disponibilidad.',
+                        'Qué mala suerte, alguien nos robó ese huequito recién ✨. Escribe de nuevo "citas" para mirar otro lugar.',
+                        'el sistema acaba de reportar que se bloqueó el campito 💔. Vuelve a decir "agendar" para buscar otro.',
+                        'Disculpa, se nos adelantaron por poco. Intenta hacer el proceso otra vez, no tardamos nada 🌸',
+                        '¡la suerte no alcanzó! Se llenó la hora justico. Escribe para intentarlo otra vez 🎀'
                     ]));
                     delete sessions[from];
                 }
             } else {
                 sessions[from].state = 'GETTING_PHONE';
                 await humanReply(msg, getRandomMsg([
-                    'No te preocupes nena, vuelve a escribirme el número correcto: 🌸',
-                    '¡Cero estrés hermosa! Escríbelo con calmita de nuevo: ✨',
-                    'Princesa, vuélvemelo a pasar bien detalladito abajito: 💖',
-                    'Linda, mándame el número nuevamente sin afanes: 🌷',
-                    'Tranquila reina, escríbelo por aquí de nuevo: 🎀'
+                    'No te preocupes, vuelve a escribirme el número correcto: 🌸',
+                    '¡Cero estrés! Escríbelo con calmita de nuevo: ✨',
+                    'vuélvemelo a pasar bien detalladito abajito: 💖',
+                    'mándame el número nuevamente sin afanes: 🌷',
+                    'Tranquila, escríbelo por aquí de nuevo: 🎀'
                 ]));
             }
         }
@@ -798,11 +798,11 @@ async function startChoosingSlot(msg, from, date) {
 
     if (slots.length === 0) {
         await humanReply(msg, getRandomMsg([
-            `Ay nena, ya no tengo espacios de *${durText}* disponibles el ${moment(date).format('DD/MM/YYYY')} 😔. ¿Miramos otro día?`,
-            `Hermosa, para tus servicios necesito *${durText}* seguidas y ya no hay ese espacio el ${moment(date).format('DD/MM/YYYY')} 💔. ¿Busco otro día?`,
-            `Princesa, revisé y no encuentro *${durText}* libres el ${moment(date).format('DD/MM/YYYY')} 😔. ¡Dime otro día!`,
-            `Linda lastimosamente no hay bloque de *${durText}* disponible el ${moment(date).format('DD/MM/YYYY')}. ¡Pregúntame otro día! 🌸`,
-            `Reina, mis servicios toman *${durText}* y ese día ya está muy lleno. ¿Miramos otro? 🎀`
+            `Disculpa, ya no tengo espacios de *${durText}* disponibles el ${moment(date).format('DD/MM/YYYY')} 😔. ¿Miramos otro día?`,
+            `para tus servicios necesito *${durText}* seguidas y ya no hay ese espacio el ${moment(date).format('DD/MM/YYYY')} 💔. ¿Busco otro día?`,
+            `revisé y no encuentro *${durText}* libres el ${moment(date).format('DD/MM/YYYY')} 😔. ¡Dime otro día!`,
+            `lastimosamente no hay bloque de *${durText}* disponible el ${moment(date).format('DD/MM/YYYY')}. ¡Pregúntame otro día! 🌸`,
+            `mis servicios toman *${durText}* y ese día ya está muy lleno. ¿Miramos otro? 🎀`
         ]));
         delete sessions[from];
     } else {
@@ -847,7 +847,7 @@ function startReminderCron() {
                     timeText = `en aproximadamente *1 hora*`;
                 }
                 
-                const message = `¡Hola hermosa ${rem.name}! 🎀 Recuerda que tienes tu cita en Barbara Beauty ${timeText} a las *${timeStr}* para realizarte *${rem.service}*. ¡Te espero lista para dejarte divina! ✨`;
+                const message = `¡Hola ${rem.name}! 🎀 Recuerda que tienes tu cita en Barbara Beauty ${timeText} a las *${timeStr}* para realizarte *${rem.service}*. ¡Te espero lista para dejarte divina! ✨`;
                 
                 // Normalize the phone: remove spaces, dashes and ensure country code
                 let phone = rem.phone.replace(/[\s\-()]/g, '');
