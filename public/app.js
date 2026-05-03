@@ -104,10 +104,17 @@ function initCalendar() {
         dayMaxEvents: 3,
         events: async function(info, successCallback, failureCallback) {
             try {
-                const response = await fetch(`/api/schedule?start=${info.startStr}&end=${info.endStr}`);
-                const schedule = await response.json();
-                
                 const currentView = calendar.view.type;
+                let url = `/api/schedule?start=${info.startStr}&end=${info.endStr}`;
+                
+                // Use day-specific endpoint for listDay to get detailed multi-hour slots
+                if (currentView === 'listDay') {
+                    const date = info.startStr.split('T')[0];
+                    url = `/api/schedule?date=${date}`;
+                }
+
+                const response = await fetch(url);
+                const schedule = await response.json();
 
                 if (currentView === 'dayGridMonth') {
                     const counts = {};
