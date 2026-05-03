@@ -59,7 +59,7 @@ async function fixMultiSlotAppointments() {
             for (const row of rows) {
                 if (!row.service) continue;
                 // Calculate total duration (handles combined services like "Wispy Look + Soft Brows")
-                const services = row.service.split(' + ');
+                const services = row.service.split(/\s*\+\s*/);
                 const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
                 const slotsNeeded = Math.max(1, Math.ceil(totalDuration / 60));
                 if (slotsNeeded <= 1) continue;
@@ -237,7 +237,7 @@ function getDaySchedule(date) {
                 const row = rows[i];
                 if (row.name && row.service) { 
                     // Start of an appointment
-                    const services = row.service.split(' + ');
+                    const services = row.service.split(/\s*\+\s*/);
                     const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
                     slotsRemaining = Math.max(1, Math.ceil(totalDuration / 60)) - 1;
                     currentAppt = { ...row };
@@ -304,7 +304,7 @@ function cancelAppointment(date, time) {
             let slotsToFree = 1;
             if (row && row.service) {
                 // Handle combined services like "Wispy Look + Soft Brows"
-                const services = row.service.split(' + ');
+                const services = row.service.split(/\s*\+\s*/);
                 const totalDuration = services.reduce((sum, svc) => sum + (SERVICE_DURATIONS[svc.trim()] || 60), 0);
                 slotsToFree = Math.max(1, Math.ceil(totalDuration / 60));
             }
